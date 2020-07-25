@@ -1,4 +1,3 @@
-import game as game
 import pygame
 
 # import pygame.locals
@@ -20,16 +19,23 @@ RIGHT = 3
 
 
 def mode_generator(mode):
-    square_length = 75
     if mode == 'easy':
+        square_length = 75
         # 10 by 8 squares: each square is 75 x 75
         length = square_length * 10
         width = square_length * 8
         adjust_display(length, width)
     if mode == 'normal':
+        square_length = 50
         # 18 x 14
         length = square_length * 18
         width = square_length * 14
+        adjust_display(length, width)
+    if mode == 'hard':
+        # 24 x 20
+        square_length = 38
+        length = square_length * 24
+        width = square_length * 20
         adjust_display(length, width)
     pygame.display.flip()
 
@@ -52,7 +58,7 @@ def main_loop():
     global running
     # game loop
     # default easy mode, but changes if the mode is switched
-    mode_generator('easy')
+    mode_generator('hard')
     while running:
         ev = pygame.event.get()
         for event in ev:
