@@ -20,17 +20,25 @@ RIGHT = 3
 
 
 def mode_generator(mode):
-    global screen
+    square_length = 75
     if mode == 'easy':
         # 10 by 8 squares: each square is 75 x 75
-        length = 750
-        width = 600
-        screen = pygame.display.set_mode([length, width])
-        screen.fill((255, 255, 255))
-        screen.blit(set_up_tool_bar(length), [0, 0])
+        length = square_length * 10
+        width = square_length * 8
+        adjust_display(length, width)
     if mode == 'normal':
         # 18 x 14
+        length = square_length * 18
+        width = square_length * 14
+        adjust_display(length, width)
     pygame.display.flip()
+
+
+def adjust_display(l, w):
+    global screen
+    screen = pygame.display.set_mode([l, w])
+    screen.fill([34, 139, 34])
+    screen.blit(set_up_tool_bar(l), [0, 0])
 
 
 def set_up_tool_bar(length):
