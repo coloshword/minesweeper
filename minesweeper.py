@@ -17,48 +17,100 @@ running = True
 LEFT = 1
 RIGHT = 3
 
+# to swap between light green and dark green
+# to keep track of tile coordinates
 
-def mode_generator(mode):
+
+# creating the enemy class inheriting from Sprites
+class Tile(pygame.sprite.Sprite):
+    def __init__(self, s, b=False):
+        super().__init__()
+        # create the sprite of the tile
+        self.s = s
+        self.b = b
+        self.tile = pygame.Surface([self.s, self.s])
+
+    def color_tile(self, color):
+        self.tile.fill(color)
+
+    def place_tile(self, x, y):
+        screen.blit(self.tile, [x, y])
+
+
+def set_up_tiles():
+    tiles = []
     if mode == 'easy':
-        square_length = 75
+        # all the instances of Tile are in the list tiles
+        for num in range(1, 81):
+            object = Tile(50)
+            tiles.append(object)
+        # figure out the coordinates
+        x_cors = [i * 50 for i in range(10)]
+        y_cors = [i * 50 + 75 for i in range(8)]
+        # call tiles and place them
+        for y in range(8):
+            for x in range(10):
+                tile = tiles[y * 10 + x]
+                if (x + y) % 2 == 0:
+                    tile.color_tile((0, 255, 0))
+                else:
+                    tile.color_tile((34, 139, 34))
+                tile.place_tile(x_cors[x], y_cors[y])
+    pygame.display.flip()
+
+
+def get_mode():
+    global mode
+    mode = 'easy'
+
+
+def window_generator():
+    global length
+    global width
+    if mode == 'easy':
+        square_length = 50
         # 10 by 8 squares: each square is 75 x 75
         length = square_length * 10
         width = square_length * 8
         adjust_display(length, width)
     if mode == 'normal':
-        square_length = 50
+        square_length = 40
         # 18 x 14
         length = square_length * 18
         width = square_length * 14
         adjust_display(length, width)
     if mode == 'hard':
         # 24 x 20
-        square_length = 38
+        square_length = 35
         length = square_length * 24
         width = square_length * 20
         adjust_display(length, width)
     pygame.display.flip()
 
 
-def adjust_display(l, w):
-    global screen
-    screen = pygame.display.set_mode([l, w])
-    screen.fill([34, 139, 34])
-    screen.blit(set_up_tool_bar(l), [0, 0])
-
-
 def set_up_tool_bar(length):
     # tool_bar is 75 in height
     tool_bar = pygame.Surface([length, 75])
-    tool_bar.fill([0, 0, 0])
+    tool_bar.fill([135, 206, 235])
     return tool_bar
+
+
+def adjust_display(l, w):
+    global screen
+    screen = pygame.display.set_mode([l, w])
+    screen.fill([0, 0, 0])
+    screen.blit(set_up_tool_bar(l), [0, 0])
+
+#
 
 
 def main_loop():
     global running
     # game loop
     # default easy mode, but changes if the mode is switched
-    mode_generator('hard')
+    get_mode()
+    window_generator()
+    set_up_tiles()
     while running:
         ev = pygame.event.get()
         for event in ev:
