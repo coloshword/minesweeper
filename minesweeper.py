@@ -23,12 +23,12 @@ RIGHT = 3
 
 # creating the enemy class inheriting from Sprites
 class Tile(pygame.sprite.Sprite):
-    def __init__(self, s, bomb=False):
+    def __init__(self, side_length, bomb=False):
         super().__init__()
         # create the sprite of the tile
         self.s = s
-        self.bomb = b
-        self.tile = pygame.Surface([self.s, self.s])
+        self.bomb = bomb
+        self.tile = pygame.Surface([side_length, side_length])
 
     def color_tile(self, color):
         self.tile.fill(color)
