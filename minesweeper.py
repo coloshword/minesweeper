@@ -8,9 +8,6 @@ from pygame.locals import (
 
 pygame.init()
 
-# set up the display
-# screen = pygame.display.set_mode([1000, 700])
-
 # control variable for game loop
 running = True
 # vars for mouse click
@@ -36,6 +33,8 @@ class Tile(pygame.sprite.Sprite):
     def place_tile(self, x, y):
         screen.blit(self.tile, [x, y])
 
+    def become_bomb(self):
+        self.bomb = True
 
 def instances_needed(length, width):
     """Gets number of instances set_up_tiles needs to return"""
@@ -44,49 +43,28 @@ def instances_needed(length, width):
 
 def set_up_tiles(length, width, square_length):
     tiles = []
-    number_of_horizontal_squares = int(length / square_length)
-    number_of_vertical_squares = int(width / square_length)
-    for num in range(instances_needed(number_of_horizontal_squares, number_of_vertical_squares)):
+    num_hsquares = int(length / square_length)
+    num_vsquares = int(width / square_length)
+    for num in range(num_hsquares * num_vsquares):
         object = Tile(square_length)
         tiles.append(object)
     # create a set of x and y coordinates
-    x_cors = [i * square_length for i in range(number_of_horizontal_squares)]
-    y_cors = [i * square_length + 75 for i in range(number_of_vertical_squares)]
-    for y in range(number_of_vertical_squares):
-        for x in range(number_of_horizontal_squares):
-            tile = tiles[y * number_of_horizontal_squares + x]
+    x_cors = [i * square_length for i in range(num_hsquares)]
+    y_cors = [i * square_length + 75 for i in range(num_vsquares)]
+    for y in range(num_vsquares):
+        for x in range(num_hsquares):
+            tile = tiles[y * num_hsquares + x]
             if (x + y) % 2 == 0:
                 tile.color_tile((0, 255, 0))
             else:
                 tile.color_tile((34, 139, 34))
             tile.place_tile(x_cors[x], y_cors[y])
     pygame.display.flip()
-    # if mode == 'easy':
-    #     # all the instances of Tile are in the list tiles
-    #     for num in range(1, 81):
-    #         object = Tile(50)
-    #         tiles.append(object)
-    #     # figure out the coordinates
-    #     x_cors = [i * 50 for i in range(10)]
-    #     # makes a new list, y_cors consisting of the numbers [0, 7] multiplied by 50 and then with 75 added to them
-    #     y_cors = [i * 50 + 75 for i in range(8)]
-    #     # call tiles and place them
-    #     # for each y in [0, 7]
-    #     for y in range(8):
-    #         # for each x in [0, 9]
-    #         for x in range(10):
-    #             # tile = tiles(list)
-    #             tile = tiles[y * 10 + x]
-    #             if (x + y) % 2 == 0:
-    #                 tile.color_tile((0, 255, 0))
-    #             else:
-    #                 tile.color_tile((34, 139, 34))
-    #             tile.place_tile(x_cors[x], y_cors[y])
 
 
 def get_mode():
     global mode
-    mode = 'easy'
+    mode = 'hard'
 
 
 def window_generator():
