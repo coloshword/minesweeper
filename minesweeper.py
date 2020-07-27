@@ -23,11 +23,11 @@ RIGHT = 3
 
 # creating the enemy class inheriting from Sprites
 class Tile(pygame.sprite.Sprite):
-    def __init__(self, s, b=False):
+    def __init__(self, s, bomb=False):
         super().__init__()
         # create the sprite of the tile
         self.s = s
-        self.b = b
+        self.bomb = b
         self.tile = pygame.Surface([self.s, self.s])
 
     def color_tile(self, color):
@@ -73,13 +73,13 @@ def window_generator():
         length = square_length * 10
         width = square_length * 8
         adjust_display(length, width)
-    if mode == 'normal':
+    elif mode == 'normal':
         square_length = 40
         # 18 x 14
         length = square_length * 18
         width = square_length * 14
         adjust_display(length, width)
-    if mode == 'hard':
+    else:
         # 24 x 20
         square_length = 35
         length = square_length * 24
@@ -95,13 +95,11 @@ def set_up_tool_bar(length):
     return tool_bar
 
 
-def adjust_display(l, w):
+def adjust_display(length, width):
     global screen
-    screen = pygame.display.set_mode([l, w])
+    screen = pygame.display.set_mode([length, width])
     screen.fill([0, 0, 0])
-    screen.blit(set_up_tool_bar(l), [0, 0])
-
-#
+    screen.blit(set_up_tool_bar(length), [0, 0])
 
 
 def main_loop():
@@ -112,8 +110,8 @@ def main_loop():
     window_generator()
     set_up_tiles()
     while running:
-        ev = pygame.event.get()
-        for event in ev:
+        events = pygame.event.get()
+        for event in events:
             pos = pygame.mouse.get_pos()
             if event.type == QUIT:
                 running = False
