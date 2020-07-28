@@ -1,3 +1,4 @@
+from math import floor
 import pygame
 
 # import pygame.locals
@@ -20,11 +21,12 @@ RIGHT = 3
 
 # creating the enemy class inheriting from Sprites
 class Tile(pygame.sprite.Sprite):
-    def __init__(self, side_length, bomb=False):
+    def __init__(self, side_length, bomb=False, pressed=False):
         super().__init__()
         # create the sprite of the tile
         self.s = side_length
         self.bomb = bomb
+        self.pressed = pressed
         self.tile = pygame.Surface([side_length, side_length])
 
     def color_tile(self, color):
@@ -33,8 +35,13 @@ class Tile(pygame.sprite.Sprite):
     def place_tile(self, x, y):
         screen.blit(self.tile, [x, y])
 
+    def get_pressed(self, color):
+        self.pressed = True
+        self.tile.fill(color)
+
     def become_bomb(self):
         self.bomb = True
+
 
 def instances_needed(length, width):
     """Gets number of instances set_up_tiles needs to return"""
@@ -42,6 +49,7 @@ def instances_needed(length, width):
 
 
 def set_up_tiles(length, width, square_length):
+    global tiles
     tiles = []
     num_hsquares = int(length / square_length)
     num_vsquares = int(width / square_length)
@@ -64,7 +72,7 @@ def set_up_tiles(length, width, square_length):
 
 def get_mode():
     global mode
-    mode = 'hard'
+    mode = 'easy'
 
 
 def window_generator():
@@ -106,6 +114,23 @@ def adjust_display(length, width):
     screen.blit(set_up_tool_bar(length), [0, 0])
 
 
+def which_tile_press(x, y, length, square_length):
+    """Gets the tile that was pressed given the x and y cors of the mouse click"""
+    # if mode is easy, 10 x 8: length is 500, width is 400 + 75
+    # index starts at 0, each row has 10
+    y -= 75
+    index_tile = (y // square_length) * (length / square_length)
+    index_tile += floor(x / square_length)
+    return int(index_tile)
+
+
+def place_bombs(list_tiles, mouse_position):
+    if mouse_position[1] > 75:
+        list_tiles[which_tile_press(mouse_position[0], mouse_position[1], length, square_length)].get_pressed(
+            [218, 203, 193])
+        pygame.display.flip()
+
+
 def main_loop():
     global running
     # game loop
@@ -120,7 +145,7 @@ def main_loop():
             if event.type == QUIT:
                 running = False
             elif event.type == MOUSEBUTTONDOWN and event.button == LEFT:
-                pygame.draw.circle(screen, [0, 0, 255], pos, 3)
+                place_bombs(tiles, pos)
             elif event.type == MOUSEBUTTONDOWN and event.button == RIGHT:
                 pygame.draw.circle(screen, [255, 255, 255], pos, 3)
         pygame.display.flip()
