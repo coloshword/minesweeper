@@ -1,4 +1,5 @@
 from math import floor
+
 import pygame
 
 # import pygame.locals
@@ -15,58 +16,62 @@ running = True
 LEFT = 1
 RIGHT = 3
 
+
 # to swap between light green and dark green
 # to keep track of tile coordinates
 
 
 # creating the enemy class inheriting from Sprites
 class Tile(pygame.sprite.Sprite):
-    def __init__(self, side_length, bomb=False, pressed=False):
+    def __init__(self, x, y, side_length, color, bomb=False, pressed=False):
         super().__init__()
         # create the sprite of the tile
+        self.x = x
+        self.y = y
         self.s = side_length
         self.bomb = bomb
         self.pressed = pressed
         self.tile = pygame.Surface([side_length, side_length])
+        self.color = color
 
-    def color_tile(self, color):
-        self.tile.fill(color)
+    def color_tile(self):
+        self.tile.fill(self.color)
 
     def place_tile(self, x, y):
         screen.blit(self.tile, [x, y])
 
-    def get_pressed(self, color):
-        self.pressed = True
+    def get_pressed(self, color, x, y):
         self.tile.fill(color)
+        screen.blit(self.tile, [x, y])
+        self.pressed = True
 
     def become_bomb(self):
         self.bomb = True
 
 
-def instances_needed(length, width):
+def instances_needed(l, w):
     """Gets number of instances set_up_tiles needs to return"""
-    return length * width
+    return l * w
 
 
-def set_up_tiles(length, width, square_length):
+def set_up_tiles(l, w, s_l):
     global tiles
     tiles = []
-    num_hsquares = int(length / square_length)
-    num_vsquares = int(width / square_length)
-    for num in range(num_hsquares * num_vsquares):
-        object = Tile(square_length)
-        tiles.append(object)
-    # create a set of x and y coordinates
-    x_cors = [i * square_length for i in range(num_hsquares)]
-    y_cors = [i * square_length + 75 for i in range(num_vsquares)]
+    num_hsquares = l // s_l
+    num_vsquares = w // s_l
+    x_cors = [i * s_l for i in range(num_hsquares)]
+    y_cors = [i * s_l + 75 for i in range(num_vsquares)]
     for y in range(num_vsquares):
         for x in range(num_hsquares):
-            tile = tiles[y * num_hsquares + x]
             if (x + y) % 2 == 0:
-                tile.color_tile((0, 255, 0))
+                color = (169, 215, 79)
             else:
-                tile.color_tile((34, 139, 34))
-            tile.place_tile(x_cors[x], y_cors[y])
+                color = (163, 209, 72)
+            obj = Tile(x_cors[x], y_cors[y], s_l, color)
+            tiles.append(obj)
+    for obj in tiles:
+        obj.color_tile()
+        obj.place_tile(obj.x, obj.y)
     pygame.display.flip()
 
 
@@ -100,34 +105,38 @@ def window_generator():
     pygame.display.flip()
 
 
-def set_up_tool_bar(length):
+def set_up_tool_bar(l_e):
     # tool_bar is 75 in height
-    tool_bar = pygame.Surface([length, 75])
+    tool_bar = pygame.Surface([l_e, 75])
     tool_bar.fill([135, 206, 235])
     return tool_bar
 
 
-def adjust_display(length, width):
+def adjust_display(l_e, w):
     global screen
-    screen = pygame.display.set_mode([length, width])
+    screen = pygame.display.set_mode([l_e, w])
     screen.fill([0, 0, 0])
-    screen.blit(set_up_tool_bar(length), [0, 0])
+    screen.blit(set_up_tool_bar(l_e), [0, 0])
 
 
-def which_tile_press(x, y, length, square_length):
+def which_tile_press(x, y, l_e, s_l):
     """Gets the tile that was pressed given the x and y cors of the mouse click"""
     # if mode is easy, 10 x 8: length is 500, width is 400 + 75
     # index starts at 0, each row has 10
     y -= 75
-    index_tile = (y // square_length) * (length / square_length)
-    index_tile += floor(x / square_length)
+    index_tile = (y // s_l) * (l_e / s_l)
+    index_tile += floor(x / s_l)
     return int(index_tile)
 
 
-def place_bombs(list_tiles, mouse_position):
+def place_bombs(list_tiles, mouse_position, l_e, s_l):
     if mouse_position[1] > 75:
-        list_tiles[which_tile_press(mouse_position[0], mouse_position[1], length, square_length)].get_pressed(
-            [218, 203, 193])
+        tile_pressed = list_tiles[which_tile_press(mouse_position[0], mouse_position[1], l_e, s_l)]
+        if tile_pressed.color == (169, 215, 79):
+            new_color = (215, 185, 153)
+        else:
+            new_color = (229, 194, 159)
+        tile_pressed.get_pressed(new_color, tile_pressed.x, tile_pressed.y)
         pygame.display.flip()
 
 
@@ -145,7 +154,7 @@ def main_loop():
             if event.type == QUIT:
                 running = False
             elif event.type == MOUSEBUTTONDOWN and event.button == LEFT:
-                place_bombs(tiles, pos)
+                place_bombs(tiles, pos, length, square_length)
             elif event.type == MOUSEBUTTONDOWN and event.button == RIGHT:
                 pygame.draw.circle(screen, [255, 255, 255], pos, 3)
         pygame.display.flip()
