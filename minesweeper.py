@@ -119,7 +119,7 @@ def adjust_display(l_e, w):
     screen.blit(set_up_tool_bar(l_e), [0, 0])
 
 
-def which_tile_press(x, y, l_e, s_l):
+def index_tile_press(x, y, l_e, s_l):
     """Gets the tile that was pressed given the x and y cors of the mouse click"""
     # if mode is easy, 10 x 8: length is 500, width is 400 + 75
     # index starts at 0, each row has 10
@@ -129,15 +129,36 @@ def which_tile_press(x, y, l_e, s_l):
     return int(index_tile)
 
 
-def place_bombs(list_tiles, mouse_position, l_e, s_l):
+def change_tile_color(list_tiles, mouse_position, l, s_l):
     if mouse_position[1] > 75:
-        tile_pressed = list_tiles[which_tile_press(mouse_position[0], mouse_position[1], l_e, s_l)]
+        tile_pressed = list_tiles[index_tile_press(mouse_position[0], mouse_position[1], l, s_l)]
         if tile_pressed.color == (169, 215, 79):
             new_color = (215, 185, 153)
         else:
             new_color = (229, 194, 159)
         tile_pressed.get_pressed(new_color, tile_pressed.x, tile_pressed.y)
         pygame.display.flip()
+        return tile_pressed
+
+
+def spawn_bombs(list_tiles, mouse_position, l, s_l):
+    safe_tile = change_tile_color(list_tiles, mouse_position, l, s_l)
+    x = safe_tile.x
+    y = safe_tile.y
+    # safe spaces are the 8 tiles around the safe_tile
+    safe_tiles = []
+    # hard_coding the coordinates of the 8 nearby tiles
+    for row in range(-1, 2):
+        for column in range(-1, 2):
+            index_of_tile_pressed = index_tile_press(x + column * s_l, y + row * s_l, l, s_lgit)
+            safe_tiles.append(list_tiles[index_of_tile_pressed])
+    for tile in safe_tiles:
+        if tile.color == (169, 215, 79):
+            new_color = (215, 185, 153)
+        else:
+            new_color = (229, 194, 159)
+        tile.get_pressed(new_color, tile.x, tile.y)
+    pygame.display.flip()
 
 
 def main_loop():
@@ -154,9 +175,15 @@ def main_loop():
             if event.type == QUIT:
                 running = False
             elif event.type == MOUSEBUTTONDOWN and event.button == LEFT:
-                place_bombs(tiles, pos, length, square_length)
-            elif event.type == MOUSEBUTTONDOWN and event.button == RIGHT:
-                pygame.draw.circle(screen, [255, 255, 255], pos, 3)
+                spawn_bombs(tiles, pos, length, square_length)
+                running = False
+    # game loop after bombs are placed
+    running = True
+    while running:
+        events = pygame.event.get()
+        for event in events:
+            if event.type == QUIT:
+                running = False
         pygame.display.flip()
 
 
