@@ -1,5 +1,5 @@
 from math import floor
-
+from random import randint
 import pygame
 
 # import pygame.locals
@@ -130,18 +130,23 @@ def index_tile_press(x, y, l_e, s_l):
 
 
 def change_tile_color(list_tiles, mouse_position, l, s_l):
+    global running
     if mouse_position[1] > 75:
         tile_pressed = list_tiles[index_tile_press(mouse_position[0], mouse_position[1], l, s_l)]
-        if tile_pressed.color == (169, 215, 79):
-            new_color = (215, 185, 153)
+        if tile_pressed.bomb:
+            running = False
         else:
-            new_color = (229, 194, 159)
-        tile_pressed.get_pressed(new_color, tile_pressed.x, tile_pressed.y)
-        pygame.display.flip()
-        return tile_pressed
+            if tile_pressed.color == (169, 215, 79):
+                new_color = (215, 185, 153)
+            else:
+                new_color = (229, 194, 159)
+            tile_pressed.get_pressed(new_color, tile_pressed.x, tile_pressed.y)
+            pygame.display.flip()
+            return tile_pressed
 
 
-def spawn_bombs(list_tiles, mouse_position, l, s_l):
+def create_safe_spots(list_tiles, mouse_position, l, s_l):
+    global safe_tiles
     safe_tile = change_tile_color(list_tiles, mouse_position, l, s_l)
     x = safe_tile.x
     y = safe_tile.y
@@ -150,7 +155,7 @@ def spawn_bombs(list_tiles, mouse_position, l, s_l):
     # hard_coding the coordinates of the 8 nearby tiles
     for row in range(-1, 2):
         for column in range(-1, 2):
-            index_of_tile_pressed = index_tile_press(x + column * s_l, y + row * s_l, l, s_lgit)
+            index_of_tile_pressed = index_tile_press(x + column * s_l, y + row * s_l, l, s_l)
             safe_tiles.append(list_tiles[index_of_tile_pressed])
     for tile in safe_tiles:
         if tile.color == (169, 215, 79):
@@ -159,6 +164,27 @@ def spawn_bombs(list_tiles, mouse_position, l, s_l):
             new_color = (229, 194, 159)
         tile.get_pressed(new_color, tile.x, tile.y)
     pygame.display.flip()
+
+
+def spawn_bombs(list_of_tiles, game_mode):
+    can_be_bomb = list_of_tiles.copy()
+    for tile in list_of_tiles:
+        if tile.pressed:
+            can_be_bomb.remove(tile)
+    if game_mode == 'easy':
+        # 10 bombs
+        for bomb in range(10):
+            # bomb is the index of a randomly generated bomb
+            bomb = randint(0, len(can_be_bomb))
+            can_be_bomb[bomb].become_bomb()
+    if game_mode == 'normal':
+        for bomb in range(40):
+            bomb = randint(0, len(can_be_bomb))
+            can_be_bomb[bomb].become_bomb()
+    if game_mode == 'hard':
+        for bomb in range(99):
+            bomb = randint(0, len(can_be_bomb))
+            can_be_bomb[bomb].become_bomb()
 
 
 def main_loop():
@@ -175,15 +201,19 @@ def main_loop():
             if event.type == QUIT:
                 running = False
             elif event.type == MOUSEBUTTONDOWN and event.button == LEFT:
-                spawn_bombs(tiles, pos, length, square_length)
+                create_safe_spots(tiles, pos, length, square_length)
+                spawn_bombs(tiles, mode)
                 running = False
     # game loop after bombs are placed
     running = True
     while running:
         events = pygame.event.get()
         for event in events:
+            pos = pygame.mouse.get_pos()
             if event.type == QUIT:
                 running = False
+            elif event.type == MOUSEBUTTONDOWN and event.button == LEFT:
+                change_tile_color(tiles, pos, length, square_length)
         pygame.display.flip()
 
 
