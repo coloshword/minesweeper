@@ -9,6 +9,8 @@ from pygame.locals import (
 )
 
 pygame.init()
+pygame.font.init()
+font = pygame.font.SysFont('Comic Sans MS', 30)
 
 # control variable for game loop
 running = True
@@ -23,7 +25,7 @@ RIGHT = 3
 
 # creating the enemy class inheriting from Sprites
 class Tile(pygame.sprite.Sprite):
-    def __init__(self, x, y, side_length, color, bomb=False, pressed=False):
+    def __init__(self, x, y, side_length, color, bomb=False, pressed=False, number=None):
         super().__init__()
         # create the sprite of the tile
         self.x = x
@@ -33,6 +35,7 @@ class Tile(pygame.sprite.Sprite):
         self.pressed = pressed
         self.tile = pygame.Surface([side_length, side_length])
         self.color = color
+        self.number = number
 
     def color_tile(self):
         self.tile.fill(self.color)
@@ -168,7 +171,7 @@ def create_safe_spots(list_tiles, mouse_position, l, s_l):
 
 def spawn_bombs(list_of_tiles, game_mode):
     can_be_bomb = list_of_tiles.copy()
-    for tile in list_of_tiles:
+    for tile in can_be_bomb:
         if tile.pressed:
             can_be_bomb.remove(tile)
     if game_mode == 'easy':
@@ -187,6 +190,35 @@ def spawn_bombs(list_of_tiles, game_mode):
             can_be_bomb[bomb].become_bomb()
 
 
+def get_indices_of_adjacent_tiles(index_of_tile, num_hsquares):
+    adjacent_indices = []
+    for y in range(-1, 2):
+        for x in range(-1, 2):
+            index_adjacent = index_of_tile + (y * num_hsquares) + x
+            if index_adjacent != index_of_tile and index_adjacent >= 0:
+                adjacent_indices.append(index_adjacent)
+    return adjacent_indices
+
+
+def get_numbers(list_of_tiles):
+    """Gets the number displayed on each tile"""
+    current_tile = 0
+    for tile in list_of_tiles:
+        if not(tile.bomb):
+            adjacent_bombs = 0
+            for tile_index in get_indices_of_adjacent_tiles(current_tile, length // square_length):
+                if not(list_of_tiles[tile_index].bomb):
+                    adjacent_bombs += 1
+            tile.number = adjacent_bombs
+
+
+def display_them_numbers(list_of_tiles):
+    for tile in list_of_tiles:
+        if tile.pressed and tile.number > 0:
+            displayed_number = font.render(str(tile.number), False, (255, 255, 255))
+            screen.blit(displayed_number, (tile.x, tile.y))
+
+
 def main_loop():
     global running
     # game loop
@@ -203,6 +235,8 @@ def main_loop():
             elif event.type == MOUSEBUTTONDOWN and event.button == LEFT:
                 create_safe_spots(tiles, pos, length, square_length)
                 spawn_bombs(tiles, mode)
+                get_numbers(tiles)
+                display_them_numbers(tiles)
                 running = False
     # game loop after bombs are placed
     running = True
@@ -214,6 +248,7 @@ def main_loop():
                 running = False
             elif event.type == MOUSEBUTTONDOWN and event.button == LEFT:
                 change_tile_color(tiles, pos, length, square_length)
+                display_them_numbers(tiles)
         pygame.display.flip()
 
 
