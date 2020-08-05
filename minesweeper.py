@@ -10,6 +10,7 @@ from pygame.locals import (
 
 pygame.init()
 pygame.font.init()
+# pygame.font.SysFont(font, size)
 font = pygame.font.SysFont('Comic Sans MS', 30)
 
 # control variable for game loop
@@ -25,7 +26,7 @@ RIGHT = 3
 
 # creating the enemy class inheriting from Sprites
 class Tile(pygame.sprite.Sprite):
-    def __init__(self, x, y, side_length, color, bomb=False, pressed=False, number=None):
+    def __init__(self, x, y, side_length, color, bomb=False, pressed=False, number=0):
         super().__init__()
         # create the sprite of the tile
         self.x = x
@@ -57,24 +58,48 @@ def instances_needed(l, w):
     return l * w
 
 
+# def set_up_tiles(l, w, s_l):
+#     global tiles
+#     tiles = []
+#     num_hsquares = l // s_l
+#     num_vsquares = w // s_l
+#     x_cors = [i * s_l for i in range(num_hsquares)]
+#     y_cors = [i * s_l + 75 for i in range(num_vsquares)]
+#     for y in range(num_vsquares):
+#         for x in range(num_hsquares):
+#             if (x + y) % 2 == 0:
+#                 color = (169, 215, 79)
+#             else:
+#                 color = (163, 209, 72)
+#             obj = Tile(x_cors[x], y_cors[y], s_l, color)
+#             tiles.append(obj)
+#     for obj in tiles:
+#         obj.color_tile()
+#         obj.place_tile(obj.x, obj.y)
+#     pygame.display.flip()
+
+
 def set_up_tiles(l, w, s_l):
-    global tiles
-    tiles = []
+    global grid
+    grid = []
     num_hsquares = l // s_l
     num_vsquares = w // s_l
     x_cors = [i * s_l for i in range(num_hsquares)]
     y_cors = [i * s_l + 75 for i in range(num_vsquares)]
     for y in range(num_vsquares):
+        row = []
         for x in range(num_hsquares):
-            if (x + y) % 2 == 0:
+            if (x+y) % 2 == 0:
                 color = (169, 215, 79)
             else:
                 color = (163, 209, 72)
             obj = Tile(x_cors[x], y_cors[y], s_l, color)
-            tiles.append(obj)
-    for obj in tiles:
-        obj.color_tile()
-        obj.place_tile(obj.x, obj.y)
+            row.append(obj)
+        grid.append(row)
+    for row in grid:
+        for tile in row:
+            tile.color_tile()
+            tile.place_tile(tile.x, tile.y)
     pygame.display.flip()
 
 
@@ -127,15 +152,16 @@ def index_tile_press(x, y, l_e, s_l):
     # if mode is easy, 10 x 8: length is 500, width is 400 + 75
     # index starts at 0, each row has 10
     y -= 75
-    index_tile = (y // s_l) * (l_e / s_l)
-    index_tile += floor(x / s_l)
-    return int(index_tile)
+    row = (y // s_l) * (l_e / s_l)
+    index = x // s_l
+    return(int(row), int(index))
 
 
 def change_tile_color(list_tiles, mouse_position, l, s_l):
     global running
     if mouse_position[1] > 75:
-        tile_pressed = list_tiles[index_tile_press(mouse_position[0], mouse_position[1], l, s_l)]
+        loc_tile_pressed = index_tile_press(mouse_position[0], mouse_position[1], l, s_l)
+        tile_pressed = list_tiles[loc_tile_pressed[0]][loc_tile_pressed[1]]
         if tile_pressed.bomb:
             running = False
         else:
@@ -202,14 +228,16 @@ def get_indices_of_adjacent_tiles(index_of_tile, num_hsquares):
 
 def get_numbers(list_of_tiles):
     """Gets the number displayed on each tile"""
+    new_list = list_of_tiles.copy()
     current_tile = 0
-    for tile in list_of_tiles:
+    for tile in new_list:
         if not(tile.bomb):
             adjacent_bombs = 0
             for tile_index in get_indices_of_adjacent_tiles(current_tile, length // square_length):
-                if not(list_of_tiles[tile_index].bomb):
+                if new_list[tile_index].bomb:
                     adjacent_bombs += 1
             tile.number = adjacent_bombs
+        current_tile += 1
 
 
 def display_them_numbers(list_of_tiles):
@@ -233,23 +261,25 @@ def main_loop():
             if event.type == QUIT:
                 running = False
             elif event.type == MOUSEBUTTONDOWN and event.button == LEFT:
-                create_safe_spots(tiles, pos, length, square_length)
-                spawn_bombs(tiles, mode)
-                get_numbers(tiles)
-                display_them_numbers(tiles)
-                running = False
-    # game loop after bombs are placed
-    running = True
-    while running:
-        events = pygame.event.get()
-        for event in events:
-            pos = pygame.mouse.get_pos()
-            if event.type == QUIT:
-                running = False
-            elif event.type == MOUSEBUTTONDOWN and event.button == LEFT:
-                change_tile_color(tiles, pos, length, square_length)
-                display_them_numbers(tiles)
-        pygame.display.flip()
+                change_tile_color(grid, pos, length, square_length)
+            pygame.display.flip()
+    #             create_safe_spots(grid, pos, length, square_length)
+    #             spawn_bombs(grid, mode)
+    #             get_numbers(grid)
+    #             display_them_numbers(grid)
+    #             running = False
+    # # game loop after bombs are placed
+    # running = True
+    # while running:
+    #     events = pygame.event.get()
+    #     for event in events:
+    #         pos = pygame.mouse.get_pos()
+    #         if event.type == QUIT:
+    #             running = False
+    #         elif event.type == MOUSEBUTTONDOWN and event.button == LEFT:
+    #             change_tile_color(grid, pos, length, square_length)
+    #             display_them_numbers(grid)
+    #     pygame.display.flip()
 
 
 main_loop()
