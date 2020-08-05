@@ -147,20 +147,20 @@ def adjust_display(l_e, w):
     screen.blit(set_up_tool_bar(l_e), [0, 0])
 
 
-def index_tile_press(x, y, l_e, s_l):
+def index_tile_press(x, y, s_l):
     """Gets the tile that was pressed given the x and y cors of the mouse click"""
     # if mode is easy, 10 x 8: length is 500, width is 400 + 75
     # index starts at 0, each row has 10
     y -= 75
-    row = (y // s_l) * (l_e / s_l)
+    row = (y // s_l)
     index = x // s_l
     return(int(row), int(index))
 
 
-def change_tile_color(list_tiles, mouse_position, l, s_l):
+def change_tile_color(list_tiles, mouse_position, s_l):
     global running
     if mouse_position[1] > 75:
-        loc_tile_pressed = index_tile_press(mouse_position[0], mouse_position[1], l, s_l)
+        loc_tile_pressed = index_tile_press(mouse_position[0], mouse_position[1], s_l)
         tile_pressed = list_tiles[loc_tile_pressed[0]][loc_tile_pressed[1]]
         if tile_pressed.bomb:
             running = False
@@ -261,7 +261,7 @@ def main_loop():
             if event.type == QUIT:
                 running = False
             elif event.type == MOUSEBUTTONDOWN and event.button == LEFT:
-                change_tile_color(grid, pos, length, square_length)
+                change_tile_color(grid, pos, square_length)
             pygame.display.flip()
     #             create_safe_spots(grid, pos, length, square_length)
     #             spawn_bombs(grid, mode)
