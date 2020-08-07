@@ -58,27 +58,6 @@ def instances_needed(l, w):
     return l * w
 
 
-# def set_up_tiles(l, w, s_l):
-#     global tiles
-#     tiles = []
-#     num_hsquares = l // s_l
-#     num_vsquares = w // s_l
-#     x_cors = [i * s_l for i in range(num_hsquares)]
-#     y_cors = [i * s_l + 75 for i in range(num_vsquares)]
-#     for y in range(num_vsquares):
-#         for x in range(num_hsquares):
-#             if (x + y) % 2 == 0:
-#                 color = (169, 215, 79)
-#             else:
-#                 color = (163, 209, 72)
-#             obj = Tile(x_cors[x], y_cors[y], s_l, color)
-#             tiles.append(obj)
-#     for obj in tiles:
-#         obj.color_tile()
-#         obj.place_tile(obj.x, obj.y)
-#     pygame.display.flip()
-
-
 def set_up_tiles(l, w, s_l):
     global grid
     grid = []
@@ -171,28 +150,47 @@ def change_tile_color(list_tiles, mouse_position, s_l):
                 new_color = (229, 194, 159)
             tile_pressed.get_pressed(new_color, tile_pressed.x, tile_pressed.y)
             pygame.display.flip()
-            return tile_pressed
+            return loc_tile_pressed
+
+#
+# def create_safe_spots(list_tiles, mouse_position, s_l):
+#     # run this instead of change_tile_color the first time
+#     global safe_tiles
+#     safe_tiles = [change_tile_color(list_tiles, mouse_position, s_l)]
+#     row_safe = safe_tiles[0][0]
+#     index_safe = safe_tiles[0][1]
+#     for row in range(-1, 2):
+#         safe_in_row = []
+#         for index in range(-1, 2):
+#             safe_index = index_safe + index
+#
+#     # for tile in safe_tiles:
+#     #     if tile.color == (169, 215, 79):
+#     #         new_color = (215, 185, 153)
+#     #     else:
+#     #         new_color = (229, 194, 159)
+#     #     tile.get_pressed(new_color, tile.x, tile.y)
+#     # pygame.display.flip()
 
 
-def create_safe_spots(list_tiles, mouse_position, l, s_l):
-    global safe_tiles
-    safe_tile = change_tile_color(list_tiles, mouse_position, l, s_l)
-    x = safe_tile.x
-    y = safe_tile.y
-    # safe spaces are the 8 tiles around the safe_tile
-    safe_tiles = []
-    # hard_coding the coordinates of the 8 nearby tiles
+def create_safe_spots(list_tiles, mouse_position, s_l):
+    # run this instead of change_tile_color for the first tile
+    global safe_tile_locations
+    # in the list is the tuple of (row, list)
+    safe_tile_locations = [change_tile_color(list_tiles, mouse_position, s_l)]
+    row_safe = safe_tile_locations[0][0]
+    index_safe = safe_tile_locations[0][1]
     for row in range(-1, 2):
-        for column in range(-1, 2):
-            index_of_tile_pressed = index_tile_press(x + column * s_l, y + row * s_l, l, s_l)
-            safe_tiles.append(list_tiles[index_of_tile_pressed])
-    for tile in safe_tiles:
+        for index in range(-1, 2):
+            if row_safe + row > 0 and index_safe + index > 0:
+                safe_tile_locations.append((row_safe + row, index_safe + index))
+    for location in safe_tile_locations:
+        tile = list_tiles[location[0]][location[1]]
         if tile.color == (169, 215, 79):
             new_color = (215, 185, 153)
         else:
             new_color = (229, 194, 159)
         tile.get_pressed(new_color, tile.x, tile.y)
-    pygame.display.flip()
 
 
 def spawn_bombs(list_of_tiles, game_mode):
@@ -261,7 +259,7 @@ def main_loop():
             if event.type == QUIT:
                 running = False
             elif event.type == MOUSEBUTTONDOWN and event.button == LEFT:
-                change_tile_color(grid, pos, square_length)
+                create_safe_spots(grid, pos, square_length)
             pygame.display.flip()
     #             create_safe_spots(grid, pos, length, square_length)
     #             spawn_bombs(grid, mode)
