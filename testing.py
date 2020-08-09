@@ -1,3 +1,6 @@
+from random import randint
+
+
 def set_up_tiles(l, w, s_l):
     global grid
     grid = []
@@ -16,20 +19,20 @@ def set_up_tiles(l, w, s_l):
             row.append(obj)
         grid.append(row)
 
+# bomb = randint(0, 80)
+
+def choose_bomb():
+    bomb = randint(0, ((length // square_length) * (width // square_length) - 1))
+    row = bomb // (length // square_length)
+    index = bomb % (length // square_length)
+    return (row, index)
 
 
-def create_safe_spots(list_tiles, mouse_position, s_l):
-    # run this instead of change_tile_color for the first tile
-    global safe_tile_locations
-    # in the list is the tuple of (row, list)
-    safe_tile_locations = [change_tile_color(list_tiles, mouse_position, s_l)]
-    row_safe = safe_tile_locations[0][0]
-    index_safe = safe_tile_locations[0][1]
-    print(row_safe)
-    print(index_safe)
+length = 500
+width = 400
+square_length = 50
+set_up_tiles(length, width, square_length)
 
-set_up_tiles(500, 400, 50)
-create_safe_spots(grid, )
-
-
-print((grid[1][0])[0])
+bomb_loc = choose_bomb()
+print(bomb_loc)
+print(grid[bomb_loc[0]][bomb_loc[1]])
