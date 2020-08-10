@@ -51,11 +51,13 @@ class Tile(pygame.sprite.Sprite):
         self.tile.fill(new_color)
         screen.blit(self.tile, [x, y])
         self.pressed = True
+        self.display_numb()
 
     def display_numb(self):
-        display_numb = font.render(str(self.number), False, [255, 255, 255])
-        screen.blit(display_numb, (int(self.x + square_length / 2.5), int(self.y + square_length / 3)))
-        pygame.display.flip()
+        if self.number > 0:
+            display_numb = font.render(str(self.number), False, [255, 255, 255])
+            screen.blit(display_numb, (int(self.x + square_length / 2.5), int(self.y + square_length / 3)))
+            pygame.display.flip()
 
     def become_bomb(self):
         self.bomb = True
@@ -157,8 +159,6 @@ def change_tile_color(list_tiles, mouse_position, s_l):
             running = False
         else:
             tile_pressed.get_pressed(tile_pressed.x, tile_pressed.y)
-            tile_pressed.display_numb()
-            pygame.display.flip()
             return loc_tile_pressed
 
 
