@@ -71,7 +71,7 @@ def set_up_tiles(l, w, s_l):
     for y in range(num_vsquares):
         row = []
         for x in range(num_hsquares):
-            if (x+y) % 2 == 0:
+            if (x + y) % 2 == 0:
                 color = (169, 215, 79)
             else:
                 color = (163, 209, 72)
@@ -140,7 +140,7 @@ def index_tile_press(x, y, s_l):
     y -= 75
     row = (y // s_l)
     index = x // s_l
-    return(int(row), int(index))
+    return (int(row), int(index))
 
 
 def change_tile_color(list_tiles, mouse_position, s_l):
@@ -187,6 +187,25 @@ def show_bombs():
                 pygame.draw.circle(screen, [255, 255, 255], [tile.x + 25, tile.y + 25], 5)
 
 
+def adjacent_bombs(tile_loc):
+    row_pressed = tile_loc[0]  # 1
+    tile_pressed = tile_loc[1]  # 0
+    bombs_near = 0
+    for row in range(-1, 2):
+        for tile in range(-1, 2):
+            if (0 <= (row_pressed + row) <= 7) and (0 <= (tile_pressed + tile) <= 9):
+                if grid[row_pressed + row][tile_pressed + tile].bomb:
+                    bombs_near += 1
+    return bombs_near
+
+
+def get_numbs():
+    """Gives all tiles their numbers"""
+    for row in grid:
+        for tile in row:
+            tile.number = adjacent_bombs((index_tile_press(tile.x, tile.y, square_length)))
+
+
 def main_loop():
     global running
     get_mode()
@@ -202,6 +221,7 @@ def main_loop():
                 create_safe_spots(grid, pos, square_length)
                 spawn_bombs(grid, bombs_spawned)
                 show_bombs()
+                get_numbs()
                 running = False
             pygame.display.flip()
     #             get_numbers(grid)
