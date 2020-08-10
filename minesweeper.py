@@ -65,7 +65,7 @@ def set_up_tiles(l, w, s_l):
     global grid
     grid = []
     num_hsquares = l // s_l
-    num_vsquares = w // s_l
+    num_vsquares = (w - 75) // s_l
     x_cors = [i * s_l for i in range(num_hsquares)]
     y_cors = [i * s_l + 75 for i in range(num_vsquares)]
     for y in range(num_vsquares):
@@ -173,10 +173,8 @@ def create_safe_spots(list_tiles, mouse_position, s_l):
 
 def spawn_bombs(list_of_tiles, num_bombs):
     flatten_list = sum(list_of_tiles, [])
-    for tile in flatten_list:
-        if tile.pressed:
-            flatten_list.remove(tile)
-    bombs = sample(flatten_list, num_bombs + 1)
+    flatten_list = [tile for tile in flatten_list if not tile.pressed]
+    bombs = sample(flatten_list, num_bombs)
     for bomb in bombs:
         bomb.become_bomb()
 
@@ -189,41 +187,8 @@ def show_bombs():
                 pygame.draw.circle(screen, [255, 255, 255], [tile.x + 25, tile.y + 25], 5)
 
 
-# def get_indices_of_adjacent_tiles(index_of_tile, num_hsquares):
-#     adjacent_indices = []
-#     for y in range(-1, 2):
-#         for x in range(-1, 2):
-#             index_adjacent = index_of_tile + (y * num_hsquares) + x
-#             if index_adjacent != index_of_tile and index_adjacent >= 0:
-#                 adjacent_indices.append(index_adjacent)
-#     return adjacent_indices
-#
-#
-# def get_numbers(list_of_tiles):
-#     """Gets the number displayed on each tile"""
-#     new_list = list_of_tiles.copy()
-#     current_tile = 0
-#     for tile in new_list:
-#         if not(tile.bomb):
-#             adjacent_bombs = 0
-#             for tile_index in get_indices_of_adjacent_tiles(current_tile, length // square_length):
-#                 if new_list[tile_index].bomb:
-#                     adjacent_bombs += 1
-#             tile.number = adjacent_bombs
-#         current_tile += 1
-#
-#
-# def display_them_numbers(list_of_tiles):
-#     for tile in list_of_tiles:
-#         if tile.pressed and tile.number > 0:
-#             displayed_number = font.render(str(tile.number), False, (255, 255, 255))
-#             screen.blit(displayed_number, (tile.x, tile.y))
-
-
 def main_loop():
     global running
-    # game loop
-    # default easy mode, but changes if the mode is switched
     get_mode()
     window_generator()
     set_up_tiles(length, width, square_length)
