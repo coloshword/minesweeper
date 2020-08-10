@@ -1,5 +1,4 @@
-from math import floor
-from random import randint
+from random import sample
 import pygame
 
 # import pygame.locals
@@ -159,7 +158,6 @@ def change_tile_color(list_tiles, mouse_position, s_l):
 
 def create_safe_spots(list_tiles, mouse_position, s_l):
     # run this instead of change_tile_color for the first tile
-    global safe_tile_locations
     # in the list is the tuple of (row, list)
     safe_tile_locations = [change_tile_color(list_tiles, mouse_position, s_l)]
     row_safe = safe_tile_locations[0][0]
@@ -173,21 +171,22 @@ def create_safe_spots(list_tiles, mouse_position, s_l):
         tile.get_pressed(tile.x, tile.y)
 
 
-# def choose_bomb():
-#     bomb = randint(0, (length // square_length) * (width // square_length) - 1)
-#     row = bomb // (length // square_length)
-#     index = bomb % (length // square_length)
-#     return (row, index)
-#
-#
-# def spawn_bombs(list_of_tiles, num_bombs):
-#     for spawn in range(num_bombs):
-#         bomb_loc = choose_bomb()
-#         bomb_tile = list_of_tiles[bomb_loc[0]][bomb_loc[1]]
-#         while bomb_tile.pressed:
-#             bomb_loc = choose_bomb()
-#             bomb_tile = list_of_tiles[bomb_loc[0]][bomb_loc[1]]
-#             bomb_tile.become_bomb()
+def spawn_bombs(list_of_tiles, num_bombs):
+    flatten_list = sum(list_of_tiles, [])
+    for tile in flatten_list:
+        if tile.pressed:
+            flatten_list.remove(tile)
+    bombs = sample(flatten_list, num_bombs + 1)
+    for bomb in bombs:
+        bomb.become_bomb()
+
+
+def show_bombs():
+    """A test function to see if the correct number of bombs spawn"""
+    for row in grid:
+        for tile in row:
+            if tile.bomb:
+                pygame.draw.circle(screen, [255, 255, 255], [tile.x + 25, tile.y + 25], 5)
 
 
 # def get_indices_of_adjacent_tiles(index_of_tile, num_hsquares):
@@ -237,6 +236,7 @@ def main_loop():
             elif event.type == MOUSEBUTTONDOWN and event.button == LEFT:
                 create_safe_spots(grid, pos, square_length)
                 spawn_bombs(grid, bombs_spawned)
+                show_bombs()
                 running = False
             pygame.display.flip()
     #             get_numbers(grid)
