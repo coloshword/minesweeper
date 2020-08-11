@@ -25,7 +25,7 @@ RIGHT = 3
 
 # creating the enemy class inheriting from Sprites
 class Tile(pygame.sprite.Sprite):
-    def __init__(self, x, y, side_length, color, bomb=False, pressed=False, number=0):
+    def __init__(self, x, y, side_length, color, loc, bomb=False, pressed=False, number=0):
         super().__init__()
         # create the sprite of the tile
         self.x = x
@@ -36,6 +36,7 @@ class Tile(pygame.sprite.Sprite):
         self.tile = pygame.Surface([side_length, side_length])
         self.color = color
         self.number = number
+        self.loc = loc
 
     def color_tile(self):
         self.tile.fill(self.color)
@@ -75,16 +76,20 @@ def set_up_tiles(l, w, s_l):
     num_vsquares = (w - 75) // s_l
     x_cors = [i * s_l for i in range(num_hsquares)]
     y_cors = [i * s_l + 75 for i in range(num_vsquares)]
+    row_numb = 0
     for y in range(num_vsquares):
         row = []
+        tile_index = 0
         for x in range(num_hsquares):
             if (x + y) % 2 == 0:
                 color = (169, 215, 79)
             else:
                 color = (163, 209, 72)
-            obj = Tile(x_cors[x], y_cors[y], s_l, color)
+            obj = Tile(x_cors[x], y_cors[y], s_l, color, (row_numb, tile_index))
+            tile_index += 1
             row.append(obj)
         grid.append(row)
+        row_numb += 1
     for row in grid:
         for tile in row:
             tile.color_tile()
@@ -150,6 +155,11 @@ def index_tile_press(x, y, s_l):
     return (int(row), int(index))
 
 
+def test_index(index):
+    tile = grid[index[0]][index[1]]
+    return tile.loc
+
+
 def change_tile_color(list_tiles, mouse_position, s_l):
     global running
     if mouse_position[1] > 75:
@@ -210,6 +220,15 @@ def get_numbs():
     for row in grid:
         for tile in row:
             tile.number = adjacent_bombs((index_tile_press(tile.x, tile.y, square_length)))
+
+
+# def open_map(tile):
+#     """Opens the map when pressing on a tile until it hits a number"""
+#     if tile.number > 0 and tile.pressed == False:
+#         tile.get_pressed(tile.x, tile.y)
+#     else:
+#         # looks at the 4 adjacent tiles and presses them
+
 
 
 def main_loop():
