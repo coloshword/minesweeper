@@ -1,7 +1,7 @@
 from random import sample
 import pygame
 import sys
-
+pygame.font.get_fonts
 # import pygame.locals
 
 from pygame.locals import (
@@ -24,6 +24,18 @@ RIGHT = 3
 grid = None
 tiles_per_row = None
 rows_per_grid = None
+# number to color list
+colors = [
+(86, 139, 192),
+(92, 152, 82),
+(211, 47, 47),
+(123,30,162),
+(252,155,9),
+(203,69,204),
+(246,206,232),
+(254,255,213),
+(254,255,213)
+]
 
 
 class Tile(pygame.sprite.Sprite):
@@ -59,9 +71,12 @@ class Tile(pygame.sprite.Sprite):
     def get_unpressed(self):
         self.pressed = False
 
+    def numb_color(self):
+        return colors[self.number]
+
     def display_numb(self):
         if self.number > 0 and not(self.bomb):
-            display_numb = font.render(str(self.number), False, [255, 255, 255])
+            display_numb = font.render(str(self.number), False, self.numb_color())
             screen.blit(display_numb, (int(self.x + square_length / 2.5), int(self.y + square_length / 3)))
             pygame.display.flip()
 
