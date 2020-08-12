@@ -56,15 +56,11 @@ class Tile(pygame.sprite.Sprite):
         self.pressed = True
         self.display_numb()
 
-    def get_unpressed(self, x, y):
-        if self.color == (215, 185, 153):
-            new_color = (169, 215, 79)
-        else:
-            new_color = (163, 209, 72)
+    def get_unpressed(self):
         self.pressed = False
 
     def display_numb(self):
-        if self.number > 0:
+        if self.number > 0 and not(self.bomb):
             display_numb = font.render(str(self.number), False, [255, 255, 255])
             screen.blit(display_numb, (int(self.x + square_length / 2.5), int(self.y + square_length / 3)))
             pygame.display.flip()
@@ -110,7 +106,7 @@ def set_up_tiles(l, w, s_l):
 
 def get_mode():
     global mode
-    mode = 'hard'
+    mode = 'easy'
 
 
 def window_generator():
@@ -211,7 +207,7 @@ def spawn_bombs(list_of_tiles, num_bombs):
     # unpress all the pressed tiles so open_map() works properly
     for loc in safe_tiles_loc:
         tile = grid[loc[0]][loc[1]]
-        tile.get_unpressed(tile.x, tile.y)
+        tile.get_unpressed()
 
 
 def show_bombs():
