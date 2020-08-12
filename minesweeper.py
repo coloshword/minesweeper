@@ -20,13 +20,12 @@ current_tile = None
 # vars for mouse click
 LEFT = 1
 RIGHT = 3
+# vars for number of horizontal and vertical tiles
+grid = None
+tiles_per_row = None
+rows_per_grid = None
 
 
-# to swap between light green and dark green
-# to keep track of tile coordinates
-
-
-# creating the enemy class inheriting from Sprites
 class Tile(pygame.sprite.Sprite):
     def __init__(self, x, y, side_length, color, loc, bomb=False, pressed=False, number=0):
         super().__init__()
@@ -81,16 +80,18 @@ def instances_needed(l, w):
 
 def set_up_tiles(l, w, s_l):
     global grid
+    global tiles_per_row
+    global rows_per_grid
     grid = []
-    num_hsquares = l // s_l
-    num_vsquares = (w - 75) // s_l
-    x_cors = [i * s_l for i in range(num_hsquares)]
-    y_cors = [i * s_l + 75 for i in range(num_vsquares)]
+    tiles_per_row = l // s_l
+    rows_per_grid = (w - 75) // s_l
+    x_cors = [i * s_l for i in range(tiles_per_row)]
+    y_cors = [i * s_l + 75 for i in range(rows_per_grid)]
     row_numb = 0
-    for y in range(num_vsquares):
+    for y in range(rows_per_grid):
         row = []
         tile_index = 0
-        for x in range(num_hsquares):
+        for x in range(tiles_per_row):
             if (x + y) % 2 == 0:
                 color = (169, 215, 79)
             else:
@@ -109,7 +110,7 @@ def set_up_tiles(l, w, s_l):
 
 def get_mode():
     global mode
-    mode = 'easy'
+    mode = 'hard'
 
 
 def window_generator():
@@ -227,7 +228,7 @@ def adjacent_bombs(tile_loc):
     bombs_near = 0
     for row in range(-1, 2):
         for tile in range(-1, 2):
-            if (0 <= (row_pressed + row) <= 7) and (0 <= (tile_pressed + tile) <= 9):
+            if (0 <= (row_pressed + row) <= (rows_per_grid - 1)) and (0 <= (tile_pressed + tile) <= (tiles_per_row - 1)):
                 if grid[row_pressed + row][tile_pressed + tile].bomb:
                     bombs_near += 1
     return bombs_near
@@ -251,7 +252,7 @@ def open_map(tile):
         row = loc[0]
         tile = loc[1]
         loc_modifier = range(-1, 2)
-        neighbors = [(row + r, tile + t) for r in loc_modifier for t in loc_modifier if (row + r) >= 0 and (tile + t) >= 0]
+        neighbors = [(row + r, tile + t) for r in loc_modifier for t in loc_modifier if 0 <= (row + r) <= (rows_per_grid - 1) and 0 <= (tile + t) <= (tiles_per_row - 1)]
         for neighbor in neighbors:
             print(neighbor)
             cur_tile = grid[neighbor[0]][neighbor[1]]
