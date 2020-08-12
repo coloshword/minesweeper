@@ -244,7 +244,6 @@ def get_numbs():
 def open_map(tile):
     if tile.number > 0:
         tile.get_pressed(tile.x, tile.y)
-        pygame.display.flip()
     else:
         # call all eight adjacent tiles, if they are not pressed, and if tile.number == 0
         tile.get_pressed(tile.x, tile.y)
@@ -254,12 +253,10 @@ def open_map(tile):
         loc_modifier = range(-1, 2)
         neighbors = [(row + r, tile + t) for r in loc_modifier for t in loc_modifier if 0 <= (row + r) <= (rows_per_grid - 1) and 0 <= (tile + t) <= (tiles_per_row - 1)]
         for neighbor in neighbors:
-            print(neighbor)
             cur_tile = grid[neighbor[0]][neighbor[1]]
             if not(cur_tile.pressed):
                 cur_tile.get_pressed(cur_tile.x, cur_tile.y)
                 open_map(cur_tile)
-                pygame.display.flip()
 
 
 def main_loop():
@@ -294,6 +291,7 @@ def main_loop():
                 running = False
             elif event.type == MOUSEBUTTONDOWN and event.button == LEFT:
                 change_tile_color(pos, square_length)
+                open_map(current_tile)
         pygame.display.flip()
 
 
