@@ -12,7 +12,7 @@ from pygame.locals import (
 pygame.init()
 pygame.font.init()
 # pygame.font.SysFont(font, size)
-font = pygame.font.SysFont('Comic Sans MS', 30)
+font = pygame.font.SysFont('Times New Roman', 35)
 
 # control variable for game loop
 running = True
@@ -29,12 +29,12 @@ colors = [
 (86, 139, 192),
 (92, 152, 82),
 (211, 47, 47),
-(123,30,162),
-(252,155,9),
-(203,69,204),
-(246,206,232),
-(254,255,213),
-(254,255,213)
+(123, 30, 162),
+(252, 155, 9),
+(203, 69, 204),
+(246, 206, 232),
+(254, 255, 213),
+(254, 255, 213)
 ]
 
 
@@ -77,7 +77,7 @@ class Tile(pygame.sprite.Sprite):
     def display_numb(self):
         if self.number > 0 and not(self.bomb):
             display_numb = font.render(str(self.number), False, self.numb_color())
-            screen.blit(display_numb, (int(self.x + square_length / 2.5), int(self.y + square_length / 3)))
+            screen.blit(display_numb, (int(self.x + square_length / 3), int(self.y + square_length / 5)))
             pygame.display.flip()
 
     def become_bomb(self):
@@ -121,7 +121,7 @@ def set_up_tiles(l, w, s_l):
 
 def get_mode():
     global mode
-    mode = 'easy'
+    mode = 'hard'
 
 
 def window_generator():
