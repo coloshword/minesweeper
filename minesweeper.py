@@ -1,7 +1,9 @@
 from random import sample
 import pygame
+import sys
 
 # import pygame.locals
+
 from pygame.locals import (
     MOUSEBUTTONDOWN,
     QUIT
@@ -14,6 +16,7 @@ font = pygame.font.SysFont('Comic Sans MS', 30)
 
 # control variable for game loop
 running = True
+current_tile = None
 # vars for mouse click
 LEFT = 1
 RIGHT = 3
@@ -53,6 +56,13 @@ class Tile(pygame.sprite.Sprite):
         screen.blit(self.tile, [x, y])
         self.pressed = True
         self.display_numb()
+
+    def get_unpressed(self, x, y):
+        if self.color == (215, 185, 153):
+            new_color = (169, 215, 79)
+        else:
+            new_color = (163, 209, 72)
+        self.pressed = False
 
     def display_numb(self):
         if self.number > 0:
@@ -160,30 +170,34 @@ def test_index(index):
     return tile.loc
 
 
-def change_tile_color(list_tiles, mouse_position, s_l):
+def change_tile_color(mouse_position, s_l):
     global running
+    global current_tile
     if mouse_position[1] > 75:
-        loc_tile_pressed = index_tile_press(mouse_position[0], mouse_position[1], s_l)
-        tile_pressed = list_tiles[loc_tile_pressed[0]][loc_tile_pressed[1]]
+        loc_pressed = index_tile_press(mouse_position[0], mouse_position[1], s_l)
+        tile_pressed = grid[loc_pressed[0]][loc_pressed[1]]
+        current_tile = tile_pressed
         if tile_pressed.bomb:
             running = False
         else:
             tile_pressed.get_pressed(tile_pressed.x, tile_pressed.y)
-            return loc_tile_pressed
 
 
-def create_safe_spots(list_tiles, mouse_position, s_l):
-    # run this instead of change_tile_color for the first tile
-    # in the list is the tuple of (row, list)
-    safe_tile_locations = [change_tile_color(list_tiles, mouse_position, s_l)]
-    row_safe = safe_tile_locations[0][0]
-    index_safe = safe_tile_locations[0][1]
+def create_safe_spots(mouse_position):
+    global current_tile
+    global safe_tiles_loc
+    if mouse_position[1] > 75:
+        loc_pressed = index_tile_press(mouse_position[0], mouse_position[1], square_length)
+        current_tile = grid[loc_pressed[0]][loc_pressed[1]]
+    row_safe = loc_pressed[0]
+    index_safe = loc_pressed[1]
+    safe_tiles_loc = []
     for row in range(-1, 2):
         for index in range(-1, 2):
             if row_safe + row >= 0 and index_safe + index >= 0:
-                safe_tile_locations.append((row_safe + row, index_safe + index))
-    for location in safe_tile_locations:
-        tile = list_tiles[location[0]][location[1]]
+                safe_tiles_loc.append((row_safe + row, index_safe + index))
+    for loc in safe_tiles_loc:
+        tile = grid[loc[0]][loc[1]]
         tile.get_pressed(tile.x, tile.y)
 
 
@@ -193,6 +207,10 @@ def spawn_bombs(list_of_tiles, num_bombs):
     bombs = sample(flatten_list, num_bombs)
     for bomb in bombs:
         bomb.become_bomb()
+    # unpress all the pressed tiles so open_map() works properly
+    for loc in safe_tiles_loc:
+        tile = grid[loc[0]][loc[1]]
+        tile.get_unpressed(tile.x, tile.y)
 
 
 def show_bombs():
@@ -222,13 +240,25 @@ def get_numbs():
             tile.number = adjacent_bombs((index_tile_press(tile.x, tile.y, square_length)))
 
 
-# def open_map(tile):
-#     """Opens the map when pressing on a tile until it hits a number"""
-#     if tile.number > 0 and tile.pressed == False:
-#         tile.get_pressed(tile.x, tile.y)
-#     else:
-#         # looks at the 4 adjacent tiles and presses them
-
+def open_map(tile):
+    if tile.number > 0:
+        tile.get_pressed(tile.x, tile.y)
+        pygame.display.flip()
+    else:
+        # call all eight adjacent tiles, if they are not pressed, and if tile.number == 0
+        tile.get_pressed(tile.x, tile.y)
+        loc = tile.loc
+        row = loc[0]
+        tile = loc[1]
+        loc_modifier = range(-1, 2)
+        neighbors = [(row + r, tile + t) for r in loc_modifier for t in loc_modifier if (row + r) >= 0 and (tile + t) >= 0]
+        for neighbor in neighbors:
+            print(neighbor)
+            cur_tile = grid[neighbor[0]][neighbor[1]]
+            if not(cur_tile.pressed):
+                cur_tile.get_pressed(cur_tile.x, cur_tile.y)
+                open_map(cur_tile)
+                pygame.display.flip()
 
 
 def main_loop():
@@ -243,10 +273,11 @@ def main_loop():
             if event.type == QUIT:
                 running = False
             elif event.type == MOUSEBUTTONDOWN and event.button == LEFT:
-                create_safe_spots(grid, pos, square_length)
+                create_safe_spots(pos)
                 spawn_bombs(grid, bombs_spawned)
                 show_bombs()
                 get_numbs()
+                open_map(current_tile)
                 running = False
             pygame.display.flip()
     #             get_numbers(grid)
@@ -261,7 +292,7 @@ def main_loop():
             if event.type == QUIT:
                 running = False
             elif event.type == MOUSEBUTTONDOWN and event.button == LEFT:
-                change_tile_color(grid, pos, square_length)
+                change_tile_color(pos, square_length)
         pygame.display.flip()
 
 
