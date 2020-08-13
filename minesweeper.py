@@ -38,7 +38,7 @@ colors = [
 
 
 class Tile(pygame.sprite.Sprite):
-    def __init__(self, x, y, side_length, color, loc, bomb=False, pressed=False, number=0):
+    def __init__(self, x, y, side_length, color, loc, bomb=False, pressed=False, number=0, flagged=False):
         super().__init__()
         # create the sprite of the tile
         self.x = x
@@ -50,6 +50,7 @@ class Tile(pygame.sprite.Sprite):
         self.color = color
         self.number = number
         self.loc = loc
+        self.flagged = flagged
 
     def color_tile(self):
         self.tile.fill(self.color)
@@ -83,8 +84,8 @@ class Tile(pygame.sprite.Sprite):
         self.bomb = True
 
     def show_flag(self):
-        pygame.draw.rect(screen, [242, 53, 8], (self.x, self.y, 5, 25), 0)
-        self.pressed = True
+        pygame.draw.rect(screen, [242, 53, 8], (self.x + square_length // 2, self.y + square_length // 6, 5, 25), 0)
+        self.flagged = True
         pygame.display.flip()
 
 
@@ -192,13 +193,14 @@ def change_tile_color(mouse_position, s_l):
     if mouse_position[1] > 75:
         loc_pressed = index_tile_press(mouse_position[0], mouse_position[1], s_l)
         tile_pressed = grid[loc_pressed[0]][loc_pressed[1]]
-        current_tile = tile_pressed
         if tile_pressed.bomb:
             running = False
-        elif tile_pressed.pressed:
+        elif tile_pressed.flagged:
             return
         else:
             tile_pressed.get_pressed(tile_pressed.x, tile_pressed.y)
+            current_tile = tile_pressed
+        pygame.display.flip()
 
 
 def place_flag(mouse_position):
@@ -267,7 +269,9 @@ def get_numbs():
 
 
 def open_map(tile):
-    if tile.number > 0:
+    if tile.flagged:
+        return
+    elif tile.number > 0:
         tile.get_pressed(tile.x, tile.y)
     else:
         # call all eight adjacent tiles, if they are not pressed, and if tile.number == 0
@@ -279,9 +283,10 @@ def open_map(tile):
         neighbors = [(row + r, tile + t) for r in loc_modifier for t in loc_modifier if 0 <= (row + r) <= (rows_per_grid - 1) and 0 <= (tile + t) <= (tiles_per_row - 1)]
         for neighbor in neighbors:
             cur_tile = grid[neighbor[0]][neighbor[1]]
-            if not(cur_tile.pressed):
+            if not(cur_tile.pressed) and not(cur_tile.flagged):
                 cur_tile.get_pressed(cur_tile.x, cur_tile.y)
                 open_map(cur_tile)
+        pygame.display.flip()
 
 
 def main_loop():
@@ -303,10 +308,6 @@ def main_loop():
                 open_map(current_tile)
                 running = False
             pygame.display.flip()
-    #             get_numbers(grid)
-    #             display_them_numbers(grid)
-    #             running = False
-    # game loop after bombs are placed
     running = True
     while running:
         events = pygame.event.get()
@@ -314,12 +315,11 @@ def main_loop():
             pos = pygame.mouse.get_pos()
             if event.type == QUIT:
                 running = False
+            elif event.type == MOUSEBUTTONDOWN and event.button == RIGHT:
+                place_flag(pos)
             elif event.type == MOUSEBUTTONDOWN and event.button == LEFT:
                 change_tile_color(pos, square_length)
                 open_map(current_tile)
-            elif event.type == MOUSEBUTTONDOWN and event.button == RIGHT:
-                place_flag(pos)
-        pygame.display.flip()
 
 
 main_loop()
