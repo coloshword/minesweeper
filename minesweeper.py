@@ -84,7 +84,9 @@ class Tile(pygame.sprite.Sprite):
         self.bomb = True
 
     def show_flag(self):
-        if self.flagged:
+        if self.pressed:
+            return
+        elif self.flagged:
             self.flagged = False
             self.color_tile()
             self.place_tile(self.x, self.y)
