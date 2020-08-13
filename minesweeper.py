@@ -13,7 +13,6 @@ pygame.init()
 pygame.font.init()
 # pygame.font.SysFont(font, size)
 font = pygame.font.SysFont('Times New Roman', 35)
-
 # control variable for game loop
 running = True
 current_tile = None
@@ -82,6 +81,11 @@ class Tile(pygame.sprite.Sprite):
 
     def become_bomb(self):
         self.bomb = True
+
+    def show_flag(self):
+        pygame.draw.rect(screen, [242, 53, 8], (self.x, self.y, 5, 25), 0)
+        self.pressed = True
+        pygame.display.flip()
 
 
 def instances_needed(l, w):
@@ -195,6 +199,14 @@ def change_tile_color(mouse_position, s_l):
             tile_pressed.get_pressed(tile_pressed.x, tile_pressed.y)
 
 
+def place_flag(mouse_position):
+    global current_tile
+    if mouse_position[1] > 75:
+        loc_pressed = index_tile_press(mouse_position[0], mouse_position[1], square_length)
+        current_tile = grid[loc_pressed[0]][loc_pressed[1]]
+        current_tile.show_flag()
+
+
 def create_safe_spots(mouse_position):
     global current_tile
     global safe_tiles_loc
@@ -303,6 +315,8 @@ def main_loop():
             elif event.type == MOUSEBUTTONDOWN and event.button == LEFT:
                 change_tile_color(pos, square_length)
                 open_map(current_tile)
+            elif event.type == MOUSEBUTTONDOWN and event.button == RIGHT:
+                place_flag(pos)
         pygame.display.flip()
 
 
