@@ -84,8 +84,13 @@ class Tile(pygame.sprite.Sprite):
         self.bomb = True
 
     def show_flag(self):
-        pygame.draw.rect(screen, [242, 53, 8], (self.x + square_length // 2, self.y + square_length // 6, 5, 25), 0)
-        self.flagged = True
+        if self.flagged:
+            self.flagged = False
+            self.color_tile()
+            self.place_tile(self.x, self.y)
+        else:
+            pygame.draw.rect(screen, [242, 53, 8], (self.x + square_length // 2, self.y + square_length // 6, 5, 25), 0)
+            self.flagged = True
         pygame.display.flip()
 
 
