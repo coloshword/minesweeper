@@ -195,6 +195,8 @@ def change_tile_color(mouse_position, s_l):
         current_tile = tile_pressed
         if tile_pressed.bomb:
             running = False
+        elif tile_pressed.pressed:
+            return
         else:
             tile_pressed.get_pressed(tile_pressed.x, tile_pressed.y)
 
