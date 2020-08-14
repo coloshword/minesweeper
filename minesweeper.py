@@ -36,6 +36,10 @@ colors = [
 (254, 255, 213)
 ]
 
+# win or lose variables
+flags = None
+tiles_left = None
+
 
 class Tile(pygame.sprite.Sprite):
     def __init__(self, x, y, side_length, color, loc, bomb=False, pressed=False, number=0, flagged=False):
@@ -60,17 +64,22 @@ class Tile(pygame.sprite.Sprite):
         screen.blit(self.tile, [x, y])
 
     def get_pressed(self, x, y):
+        global tiles_left
         if self.color == (169, 215, 79):
             new_color = (215, 185, 153)
         else:
             new_color = (229, 194, 159)
         self.tile.fill(new_color)
         screen.blit(self.tile, [x, y])
-        self.pressed = True
+        if not(self.pressed):
+            self.pressed = True
+            tiles_left -= 1
         self.display_numb()
 
     def get_unpressed(self):
+        global tiles_left
         self.pressed = False
+        tiles_left += 1
 
     def numb_color(self):
         return colors[self.number]
@@ -136,7 +145,7 @@ def set_up_tiles(l, w, s_l):
 
 def get_mode():
     global mode
-    mode = 'hard'
+    mode = 'easy'
 
 
 def window_generator():
@@ -144,16 +153,19 @@ def window_generator():
     global width
     global square_length
     global bombs_spawned
+    global flags
+    global tiles_left
     if mode == 'easy':
         bombs_spawned = 10
         square_length = 50
-        # 10 by 8 squares: each square is 75 x 75
+        tiles_left = (10 * 8) - bombs_spawned
         length = square_length * 10
         width = square_length * 8 + 75
         adjust_display(length, width)
     elif mode == 'normal':
         bombs_spawned = 40
         square_length = 40
+        tiles_left = (18 * 14) - bombs_spawned
         # 18 x 14
         length = square_length * 18
         width = square_length * 14 + 75
@@ -161,10 +173,12 @@ def window_generator():
     else:
         bombs_spawned = 99
         # 24 x 20
+        tiles_left = (24 * 20) - bombs_spawned
         square_length = 35
         length = square_length * 24
         width = square_length * 20 + 75
         adjust_display(length, width)
+    flags = bombs_spawned
     pygame.display.flip()
 
 
@@ -299,6 +313,13 @@ def open_map(tile):
         pygame.display.flip()
 
 
+def win_lose():
+    # if all the tiles left are bombs
+    print(tiles_left)
+    if tiles_left == 0:
+        print('You win')
+
+
 def main_loop():
     global running
     get_mode()
@@ -323,6 +344,7 @@ def main_loop():
         events = pygame.event.get()
         for event in events:
             pos = pygame.mouse.get_pos()
+            win_lose()
             if event.type == QUIT:
                 running = False
             elif event.type == MOUSEBUTTONDOWN and event.button == RIGHT:
