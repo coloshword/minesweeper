@@ -51,6 +51,7 @@ class Tile(pygame.sprite.Sprite):
         self.number = number
         self.loc = loc
         self.flagged = flagged
+        self.flag_color = [242, 53, 8]
 
     def color_tile(self):
         self.tile.fill(self.color)
@@ -91,7 +92,9 @@ class Tile(pygame.sprite.Sprite):
             self.color_tile()
             self.place_tile(self.x, self.y)
         else:
-            pygame.draw.rect(screen, [242, 53, 8], (self.x + square_length // 2, self.y + square_length // 6, 5, 25), 0)
+            # draw the flag
+            pygame.draw.polygon(screen, self.flag_color, ((self.x + square_length // 2, self.y + square_length // 6), (self.x + square_length // 7, self.y + square_length // 3), (self.x + square_length // 2, self.y + square_length // 2)))
+            pygame.draw.rect(screen, self.flag_color, (self.x + square_length // 2, self.y + square_length // 6, 3, 25), 0)
             self.flagged = True
         pygame.display.flip()
 
