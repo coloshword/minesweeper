@@ -203,7 +203,7 @@ def change_tile_color(mouse_position, s_l):
     if mouse_position[1] > 75:
         loc_pressed = index_tile_press(mouse_position[0], mouse_position[1], s_l)
         tile_pressed = grid[loc_pressed[0]][loc_pressed[1]]
-        if tile_pressed.bomb:
+        if tile_pressed.bomb and not(tile_pressed.flagged):
             running = False
         elif tile_pressed.flagged:
             return
