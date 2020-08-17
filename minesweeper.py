@@ -147,7 +147,7 @@ def set_up_tiles(l, w, s_l):
 
 def get_mode():
     global mode
-    mode = 'easy'
+    mode = 'normal'
 
 
 def window_generator():
@@ -344,7 +344,7 @@ def win_message():
     pygame.draw.rect(screen, [0, 0, 0], (0, 0, length, 75), 0)
     pygame.display.flip()
     display = win_font.render('YOU WIN', False, [173, 216, 230])
-    screen.blit(display, (length // 5, (width + 75) // 3))
+    screen.blit(display, (length / 3.5, (width + 75) // 3))
     pygame.display.flip()
     print('ran once')
 
@@ -381,7 +381,6 @@ def main_loop():
             elif event.type == MOUSEBUTTONDOWN and event.button == LEFT:
                 change_tile_color(pos, square_length)
                 open_map(current_tile)
-            mouse_pressed = pygame.mouse.get_pressed()
     running = True
     while running:
         events = pygame.event.get()
