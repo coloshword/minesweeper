@@ -1,8 +1,7 @@
 from random import sample
 import pygame
-import sys
 pygame.font.get_fonts
-# import pygame.locals
+import time
 
 from pygame.locals import (
     MOUSEBUTTONDOWN,
@@ -13,6 +12,7 @@ pygame.init()
 pygame.font.init()
 # pygame.font.SysFont(font, size)
 font = pygame.font.SysFont('Times New Roman', 35)
+win_font = pygame.font.SysFont('Times New Roman', 100)
 # control variable for game loop
 running = True
 current_tile = None
@@ -39,6 +39,8 @@ colors = [
 # win or lose variables
 flags = None
 tiles_left = None
+# win message time
+win_display_time = None
 
 
 class Tile(pygame.sprite.Sprite):
@@ -155,12 +157,14 @@ def window_generator():
     global bombs_spawned
     global flags
     global tiles_left
+    global win_display_time
     if mode == 'easy':
         bombs_spawned = 10
         square_length = 50
         tiles_left = (10 * 8) - bombs_spawned
         length = square_length * 10
         width = square_length * 8 + 75
+        win_display_time = 0.1
         adjust_display(length, width)
     elif mode == 'normal':
         bombs_spawned = 40
@@ -170,6 +174,7 @@ def window_generator():
         length = square_length * 18
         width = square_length * 14 + 75
         adjust_display(length, width)
+        win_display_time = 0.05
     else:
         bombs_spawned = 99
         # 24 x 20
@@ -178,6 +183,7 @@ def window_generator():
         length = square_length * 24
         width = square_length * 20 + 75
         adjust_display(length, width)
+        win_display_time = 0.03
     flags = bombs_spawned
     pygame.display.flip()
 
@@ -313,11 +319,34 @@ def open_map(tile):
         pygame.display.flip()
 
 
-def win_lose():
+def win():
+    global running
     # if all the tiles left are bombs
-    print(tiles_left)
     if tiles_left == 0:
-        print('You win')
+        win_message()
+        running = False
+
+
+def solve_for_me():
+    for row in grid:
+        for tile in row:
+            if tile.bomb:
+                tile.show_flag()
+            else:
+                tile.get_pressed(tile.x, tile.y)
+
+
+def win_message():
+    for i in (range(rows_per_grid)[::-1]):
+        pygame.draw.rect(screen, [255, 255, 255], (0, square_length * i + 75, length, square_length), 0)
+        time.sleep(win_display_time)
+        pygame.display.flip()
+    pygame.draw.rect(screen, [0, 0, 0], (0, 0, length, 75), 0)
+    pygame.display.flip()
+    display = win_font.render('YOU WIN', False, [173, 216, 230])
+    screen.blit(display, (length // 5, (width + 75) // 3))
+    pygame.display.flip()
+    print('ran once')
 
 
 def main_loop():
@@ -344,7 +373,7 @@ def main_loop():
         events = pygame.event.get()
         for event in events:
             pos = pygame.mouse.get_pos()
-            win_lose()
+            win()
             if event.type == QUIT:
                 running = False
             elif event.type == MOUSEBUTTONDOWN and event.button == RIGHT:
@@ -352,6 +381,13 @@ def main_loop():
             elif event.type == MOUSEBUTTONDOWN and event.button == LEFT:
                 change_tile_color(pos, square_length)
                 open_map(current_tile)
+            mouse_pressed = pygame.mouse.get_pressed()
+    running = True
+    while running:
+        events = pygame.event.get()
+        for event in events:
+            if event.type == QUIT:
+                running = False
 
 
 main_loop()
