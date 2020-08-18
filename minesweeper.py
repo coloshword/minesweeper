@@ -247,6 +247,7 @@ def change_tile_color(mouse_position, s_l):
         loc_pressed = index_tile_press(mouse_position[0], mouse_position[1], s_l)
         tile_pressed = grid[loc_pressed[0]][loc_pressed[1]]
         if tile_pressed.bomb and not(tile_pressed.flagged):
+            running = False
             get_fukt(tile_pressed)
         elif tile_pressed.flagged:
             return
@@ -350,15 +351,6 @@ def win():
         running = False
 
 
-def solve_for_me():
-    for row in grid:
-        for tile in row:
-            if tile.bomb:
-                tile.show_flag()
-            else:
-                tile.get_pressed(tile.x, tile.y)
-
-
 def win_message():
     for i in (range(rows_per_grid)[::-1]):
         pygame.draw.rect(screen, [255, 255, 255], (0, square_length * i + 75, length, square_length), 0)
@@ -373,15 +365,19 @@ def win_message():
 
 
 def get_fukt(first_tile_pressed):
-    global running
     """Displays a you lose"""
     first_tile_pressed.show_bomb_tile()
+    time.sleep(1)
     for row in grid:
         for tile in row:
             if tile.bomb and tile != first_tile_pressed:
                 tile.show_bomb_tile()
                 time.sleep(0.1)
-    running = False
+    time.sleep(2)
+    pygame.draw.rect(screen, (255, 255, 255), (0, width // 5, length, width - 200), 0)
+    display = win_font.render('Get fukt', False, [173, 216, 230])
+    screen.blit(display, (length / 3.5, (width + 75) // 3))
+    pygame.display.flip()
 
 
 def main_loop():
@@ -398,7 +394,6 @@ def main_loop():
             elif event.type == MOUSEBUTTONDOWN and event.button == LEFT:
                 create_safe_spots(pos)
                 spawn_bombs(grid, bombs_spawned)
-                show_bombs()
                 get_numbs()
                 open_map(current_tile)
                 running = False
