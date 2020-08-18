@@ -1,4 +1,4 @@
-from random import sample
+from random import sample, randint
 import pygame
 pygame.font.get_fonts
 import time
@@ -36,6 +36,26 @@ colors = [
 (254, 255, 213)
 ]
 
+
+bombt_rgbs =  [
+    (255, 204, 255),
+    (204, 229, 255),
+    (255, 255, 204),
+    (204, 255, 255),
+    (204, 255, 204),
+    (255, 204, 204)
+
+]
+
+
+bomb_colors = [
+    (127, 0, 255),
+    (0, 0, 255),
+    (255, 0, 0),
+    (102, 0, 204),
+    (204, 0, 102),
+    (255, 255, 0)
+]
 # win or lose variables
 flags = None
 tiles_left = None
@@ -109,10 +129,13 @@ class Tile(pygame.sprite.Sprite):
             self.flagged = True
         pygame.display.flip()
 
-
-def instances_needed(l, w):
-    """Gets number of instances set_up_tiles needs to return"""
-    return l * w
+    def show_bomb_tile(self):
+        tile_color = bombt_rgbs[randint(0, 5)]
+        bomb_color = bomb_colors[randint(0, 5)]
+        self.tile.fill(tile_color)
+        screen.blit(self.tile, (self.x, self.y))
+        pygame.draw.circle(screen, bomb_color, (self.x + square_length //2, self.y + square_length // 2), 7)
+        pygame.display.flip()
 
 
 def set_up_tiles(l, w, s_l):
@@ -224,7 +247,7 @@ def change_tile_color(mouse_position, s_l):
         loc_pressed = index_tile_press(mouse_position[0], mouse_position[1], s_l)
         tile_pressed = grid[loc_pressed[0]][loc_pressed[1]]
         if tile_pressed.bomb and not(tile_pressed.flagged):
-            running = False
+            get_fukt(tile_pressed)
         elif tile_pressed.flagged:
             return
         else:
@@ -347,6 +370,18 @@ def win_message():
     screen.blit(display, (length / 3.5, (width + 75) // 3))
     pygame.display.flip()
     print('ran once')
+
+
+def get_fukt(first_tile_pressed):
+    global running
+    """Displays a you lose"""
+    first_tile_pressed.show_bomb_tile()
+    for row in grid:
+        for tile in row:
+            if tile.bomb and tile != first_tile_pressed:
+                tile.show_bomb_tile()
+                time.sleep(0.1)
+    running = False
 
 
 def main_loop():
