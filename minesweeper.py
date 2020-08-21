@@ -406,10 +406,10 @@ def double_pressed(mouse_pos):
     tile = loc[1]
     numb = tile_pressed.number
     adjacent_tiles_loc = [(row + x, tile + y) for x in range(-1, 2) for y in range(-1, 2) if
-                          (row + x) >= 0 and (tile + y) >= 0]
+                        0 <= (row + x) <= rows_per_grid and 0 <= (tile + y) <= tiles_per_row]
     adjacent_tiles_loc.remove(loc)
     number_flagged = 0
-    adjacent_tiles = [grid[loc[0]][loc[1]] for loc in adjacent_tiles_loc if not (grid[loc[0]][loc[1]].pressed)]
+    adjacent_tiles = [grid[loc[0]][loc[1]] for loc in adjacent_tiles_loc if not (grid[loc[0]][loc[1]].pressed) and not(grid[loc[0]][loc[1]].flagged)]
     for tile in adjacent_tiles:
         if tile.flagged:
             number_flagged += 1
