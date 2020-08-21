@@ -1,9 +1,11 @@
 from random import sample, randint
 import pygame
-pygame.font.get_fonts
 import time
 
+pygame.font.get_fonts
+
 from pygame.locals import (
+    MOUSEBUTTONUP,
     MOUSEBUTTONDOWN,
     QUIT
 )
@@ -11,7 +13,7 @@ from pygame.locals import (
 pygame.init()
 pygame.font.init()
 # pygame.font.SysFont(font, size)
-font = pygame.font.SysFont('Times New Roman', 35)
+font = pygame.font.SysFont('Roboto', 35)
 win_font = pygame.font.SysFont('Times New Roman', 100)
 # control variable for game loop
 running = True
@@ -25,19 +27,18 @@ tiles_per_row = None
 rows_per_grid = None
 # number to color list
 colors = [
-(86, 139, 192),
-(92, 152, 82),
-(211, 47, 47),
-(123, 30, 162),
-(252, 155, 9),
-(203, 69, 204),
-(246, 206, 232),
-(254, 255, 213),
-(254, 255, 213)
+    (86, 139, 192),
+    (92, 152, 82),
+    (211, 47, 47),
+    (123, 30, 162),
+    (252, 155, 9),
+    (203, 69, 204),
+    (246, 206, 232),
+    (254, 255, 213),
+    (254, 255, 213)
 ]
 
-
-bombt_rgbs =  [
+bombt_rgbs = [
     (255, 204, 255),
     (204, 229, 255),
     (255, 255, 204),
@@ -46,7 +47,6 @@ bombt_rgbs =  [
     (255, 204, 204)
 
 ]
-
 
 bomb_colors = [
     (127, 0, 255),
@@ -93,7 +93,7 @@ class Tile(pygame.sprite.Sprite):
             new_color = (229, 194, 159)
         self.tile.fill(new_color)
         screen.blit(self.tile, [x, y])
-        if not(self.pressed):
+        if not (self.pressed):
             self.pressed = True
             tiles_left -= 1
         self.display_numb()
@@ -107,7 +107,7 @@ class Tile(pygame.sprite.Sprite):
         return colors[self.number]
 
     def display_numb(self):
-        if self.number > 0 and not(self.bomb):
+        if self.number > 0 and not (self.bomb):
             display_numb = font.render(str(self.number), False, self.numb_color())
             screen.blit(display_numb, (int(self.x + square_length / 3), int(self.y + square_length / 5)))
             pygame.display.flip()
@@ -124,8 +124,11 @@ class Tile(pygame.sprite.Sprite):
             self.place_tile(self.x, self.y)
         else:
             # draw the flag
-            pygame.draw.polygon(screen, self.flag_color, ((self.x + square_length // 2, self.y + square_length // 6), (self.x + square_length // 7, self.y + square_length // 3), (self.x + square_length // 2, self.y + square_length // 2)))
-            pygame.draw.rect(screen, self.flag_color, (self.x + square_length // 2, self.y + square_length // 6, 3, 25), 0)
+            pygame.draw.polygon(screen, self.flag_color, ((self.x + square_length // 2, self.y + square_length // 6),
+                                                          (self.x + square_length // 7, self.y + square_length // 3),
+                                                          (self.x + square_length // 2, self.y + square_length // 2)))
+            pygame.draw.rect(screen, self.flag_color, (self.x + square_length // 2, self.y + square_length // 6, 3, 25),
+                             0)
             self.flagged = True
         pygame.display.flip()
 
@@ -134,8 +137,20 @@ class Tile(pygame.sprite.Sprite):
         bomb_color = bomb_colors[randint(0, 5)]
         self.tile.fill(tile_color)
         screen.blit(self.tile, (self.x, self.y))
-        pygame.draw.circle(screen, bomb_color, (self.x + square_length //2, self.y + square_length // 2), 7)
+        pygame.draw.circle(screen, bomb_color, (self.x + square_length // 2, self.y + square_length // 2), 7)
         pygame.display.flip()
+
+    def double_pressed(self):
+        if self.color == (169, 215, 79) and not(self.pressed):
+            new_color = (255, 255, 255)
+        elif not(self.pressed):
+            new_color = (0, 0, 0)
+        self.tile.fill(new_color)
+        screen.blit(self.tile, (self.x, self.y))
+
+    def revert(self):
+        self.tile.fill(self.color)
+        screen.blit(self.tile, (self.x, self.y))
 
 
 def set_up_tiles(l, w, s_l):
@@ -170,7 +185,7 @@ def set_up_tiles(l, w, s_l):
 
 def get_mode():
     global mode
-    mode = 'normal'
+    mode = 'hard'
 
 
 def window_generator():
@@ -228,7 +243,7 @@ def adjust_display(l_e, w):
 def index_tile_press(x, y, s_l):
     """Gets the tile that was pressed given the x and y cors of the mouse click"""
     # if mode is easy, 10 x 8: length is 500, width is 400 + 75
-    # index starts at 0, each row has 10
+    # index starts at 0, each row has 1
     y -= 75
     row = (y // s_l)
     index = x // s_l
@@ -246,7 +261,7 @@ def change_tile_color(mouse_position, s_l):
     if mouse_position[1] > 75:
         loc_pressed = index_tile_press(mouse_position[0], mouse_position[1], s_l)
         tile_pressed = grid[loc_pressed[0]][loc_pressed[1]]
-        if tile_pressed.bomb and not(tile_pressed.flagged):
+        if tile_pressed.bomb and not (tile_pressed.flagged):
             running = False
             get_fukt(tile_pressed)
         elif tile_pressed.flagged:
@@ -309,7 +324,8 @@ def adjacent_bombs(tile_loc):
     bombs_near = 0
     for row in range(-1, 2):
         for tile in range(-1, 2):
-            if (0 <= (row_pressed + row) <= (rows_per_grid - 1)) and (0 <= (tile_pressed + tile) <= (tiles_per_row - 1)):
+            if (0 <= (row_pressed + row) <= (rows_per_grid - 1)) and (
+                    0 <= (tile_pressed + tile) <= (tiles_per_row - 1)):
                 if grid[row_pressed + row][tile_pressed + tile].bomb:
                     bombs_near += 1
     return bombs_near
@@ -334,10 +350,11 @@ def open_map(tile):
         row = loc[0]
         tile = loc[1]
         loc_modifier = range(-1, 2)
-        neighbors = [(row + r, tile + t) for r in loc_modifier for t in loc_modifier if 0 <= (row + r) <= (rows_per_grid - 1) and 0 <= (tile + t) <= (tiles_per_row - 1)]
+        neighbors = [(row + r, tile + t) for r in loc_modifier for t in loc_modifier if
+                     0 <= (row + r) <= (rows_per_grid - 1) and 0 <= (tile + t) <= (tiles_per_row - 1)]
         for neighbor in neighbors:
             cur_tile = grid[neighbor[0]][neighbor[1]]
-            if not(cur_tile.pressed) and not(cur_tile.flagged):
+            if not (cur_tile.pressed) and not (cur_tile.flagged):
                 cur_tile.get_pressed(cur_tile.x, cur_tile.y)
                 open_map(cur_tile)
         pygame.display.flip()
@@ -361,7 +378,6 @@ def win_message():
     display = win_font.render('YOU WIN', False, [173, 216, 230])
     screen.blit(display, (length / 3.5, (width + 75) // 3))
     pygame.display.flip()
-    print('ran once')
 
 
 def get_fukt(first_tile_pressed):
@@ -380,8 +396,32 @@ def get_fukt(first_tile_pressed):
     pygame.display.flip()
 
 
+def double_pressed(mouse_pos):
+    global adjacent_tiles
+    x = mouse_pos[0]
+    y = mouse_pos[1]
+    loc = index_tile_press(x, y, square_length)
+    tile_pressed = grid[loc[0]][loc[1]]
+    row = loc[0]
+    tile = loc[1]
+    numb = tile_pressed.number
+    adjacent_tiles_loc = [(row + x, tile + y) for x in range(-1, 2) for y in range(-1, 2) if
+                          (row + x) >= 0 and (tile + y) >= 0]
+    adjacent_tiles_loc.remove(loc)
+    number_flagged = 0
+    adjacent_tiles = [grid[loc[0]][loc[1]] for loc in adjacent_tiles_loc if not (grid[loc[0]][loc[1]].pressed)]
+    for tile in adjacent_tiles:
+        if tile.flagged:
+            number_flagged += 1
+    if numb >= 1 and number_flagged < numb:
+        for tile in adjacent_tiles:
+            tile.double_pressed()
+        pygame.display.flip()
+
 def main_loop():
     global running
+    global events
+    global mouse
     get_mode()
     window_generator()
     set_up_tiles(length, width, square_length)
@@ -403,6 +443,7 @@ def main_loop():
         events = pygame.event.get()
         for event in events:
             pos = pygame.mouse.get_pos()
+            mouse = pygame.mouse.get_pressed()
             win()
             if event.type == QUIT:
                 running = False
@@ -411,6 +452,22 @@ def main_loop():
             elif event.type == MOUSEBUTTONDOWN and event.button == LEFT:
                 change_tile_color(pos, square_length)
                 open_map(current_tile)
+            elif (mouse[0] and mouse[2]):
+                double_pressed(pos)
+                loop = True
+                while loop:
+                    events2 = pygame.event.get()
+                    mouse2 = pygame.mouse.get_pressed()
+                    for event in events2:
+                        if event.type == QUIT:
+                            running = False
+                    if mouse2[2] and mouse2[0]:
+                        continue
+                    else:
+                        loop = False
+                for tile in adjacent_tiles:
+                    tile.revert()
+                pygame.display.flip()
     running = True
     while running:
         events = pygame.event.get()
