@@ -142,9 +142,9 @@ class Tile(pygame.sprite.Sprite):
 
     def double_pressed(self):
         if self.color == (169, 215, 79) and not(self.pressed):
-            new_color = (255, 255, 255)
+            new_color = (191, 226, 125)
         elif not(self.pressed):
-            new_color = (0, 0, 0)
+            new_color = (186, 221, 119)
         self.tile.fill(new_color)
         screen.blit(self.tile, (self.x, self.y))
 
