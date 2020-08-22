@@ -398,6 +398,9 @@ def get_fukt(first_tile_pressed):
 
 def double_pressed(mouse_pos):
     global adjacent_tiles
+    global adjacent_not_flagged
+    global numb
+    global number_flagged
     x = mouse_pos[0]
     y = mouse_pos[1]
     loc = index_tile_press(x, y, square_length)
@@ -408,15 +411,22 @@ def double_pressed(mouse_pos):
     adjacent_tiles_loc = [(row + x, tile + y) for x in range(-1, 2) for y in range(-1, 2) if
                         0 <= (row + x) <= rows_per_grid and 0 <= (tile + y) <= tiles_per_row]
     adjacent_tiles_loc.remove(loc)
-    number_flagged = 0
-    adjacent_tiles = [grid[loc[0]][loc[1]] for loc in adjacent_tiles_loc if not (grid[loc[0]][loc[1]].pressed) and not(grid[loc[0]][loc[1]].flagged)]
-    for tile in adjacent_tiles:
-        if tile.flagged:
-            number_flagged += 1
-    if numb >= 1 and number_flagged < numb:
-        for tile in adjacent_tiles:
+    adjacent_tiles = [grid[loc[0]][loc[1]] for loc in adjacent_tiles_loc if not (grid[loc[0]][loc[1]].pressed)]
+    adjacent_not_flagged = [tile for tile in adjacent_tiles if not(tile.flagged)]
+    number_flagged = len(adjacent_tiles) - len(adjacent_not_flagged)
+    if 1 <= numb and number_flagged < numb:
+        for tile in adjacent_not_flagged:
             tile.double_pressed()
         pygame.display.flip()
+    elif 1 <= numb == number_flagged:
+        not_bombs = [tile for tile in adjacent_not_flagged if not(tile.bomb)]
+        for tile in not_bombs:
+            change_tile_color((tile.x, tile.y), square_length)
+        pygame.display.flip()
+        for tile in adjacent_not_flagged:
+            change_tile_color((tile.x, tile.y), square_length)
+        pygame.display.flip()
+
 
 def main_loop():
     global running
@@ -465,9 +475,10 @@ def main_loop():
                         continue
                     else:
                         loop = False
-                for tile in adjacent_tiles:
-                    tile.revert()
-                pygame.display.flip()
+                if numb != number_flagged:
+                    for tile in adjacent_not_flagged:
+                        tile.revert()
+                    pygame.display.flip()
     running = True
     while running:
         events = pygame.event.get()
