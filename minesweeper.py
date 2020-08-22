@@ -1,10 +1,12 @@
 from random import sample, randint
 import pygame
 import time
+import sys
 
 pygame.font.get_fonts
 
 from pygame.locals import (
+    Rect,
     MOUSEBUTTONUP,
     MOUSEBUTTONDOWN,
     QUIT
@@ -15,6 +17,7 @@ pygame.font.init()
 # pygame.font.SysFont(font, size)
 font = pygame.font.SysFont('Roboto', 35)
 win_font = pygame.font.SysFont('Times New Roman', 100)
+font2 = pygame.font.SysFont('Calibri', 40)
 # control variable for game loop
 running = True
 current_tile = None
@@ -153,6 +156,25 @@ class Tile(pygame.sprite.Sprite):
         screen.blit(self.tile, (self.x, self.y))
 
 
+def draw_text(text, color, surface, x, y):
+    text_object = font2.render(text, 1, color)
+    text_rect = text_object.get_rect()
+    text_rect.topleft = (x, y)
+    surface.blit(text_object, text_rect)
+
+
+def get_mode(game_mode='normal'):
+    global mode
+    mode = game_mode
+
+
+def mode_menu():
+    """A button that will lead to an options menu"""
+    draw_text('MODE', (255, 182, 193), screen, 20, 20)
+    button_1 = Rect(50, 100, 200, 50)
+    pygame.draw.rect(screen, (0, 0, 0), button_1)
+
+
 def set_up_tiles(l, w, s_l):
     global grid
     global tiles_per_row
@@ -181,11 +203,6 @@ def set_up_tiles(l, w, s_l):
             tile.color_tile()
             tile.place_tile(tile.x, tile.y)
     pygame.display.flip()
-
-
-def get_mode():
-    global mode
-    mode = 'hard'
 
 
 def window_generator():
@@ -434,6 +451,7 @@ def main_loop():
     global mouse
     get_mode()
     window_generator()
+    mode_menu()
     set_up_tiles(length, width, square_length)
     while running:
         events = pygame.event.get()
@@ -457,6 +475,7 @@ def main_loop():
             win()
             if event.type == QUIT:
                 running = False
+                sys.exit()
             elif event.type == MOUSEBUTTONDOWN and event.button == RIGHT:
                 place_flag(pos)
             elif event.type == MOUSEBUTTONDOWN and event.button == LEFT:
@@ -485,6 +504,7 @@ def main_loop():
         for event in events:
             if event.type == QUIT:
                 running = False
+                sys.exit()
 
 
 main_loop()
