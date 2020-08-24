@@ -144,9 +144,9 @@ class Tile(pygame.sprite.Sprite):
         pygame.display.flip()
 
     def double_pressed(self):
-        if self.color == (169, 215, 79) and not(self.pressed):
+        if self.color == (169, 215, 79) and not (self.pressed):
             new_color = (191, 226, 125)
-        elif not(self.pressed):
+        elif not (self.pressed):
             new_color = (186, 221, 119)
         self.tile.fill(new_color)
         screen.blit(self.tile, (self.x, self.y))
@@ -156,11 +156,13 @@ class Tile(pygame.sprite.Sprite):
         screen.blit(self.tile, (self.x, self.y))
 
 
-def draw_text(text, color, surface, x, y):
-    text_object = font2.render(text, 1, color)
-    text_rect = text_object.get_rect()
-    text_rect.topleft = (x, y)
-    surface.blit(text_object, text_rect)
+def draw_text(text, style, text_color, background_color, loc):
+    #(text, font)
+    font = pygame.font.SysFont(style, 50)
+    text = font.render(text, True, text_color, background_color)
+    textRect = text.get_rect()
+    textRect.topleft = loc
+    screen.blit(text, textRect)
 
 
 def get_mode(game_mode='normal'):
@@ -170,9 +172,8 @@ def get_mode(game_mode='normal'):
 
 def mode_menu():
     """A button that will lead to an options menu"""
-    draw_text('MODE', (255, 182, 193), screen, 20, 20)
-    button_1 = Rect(50, 100, 200, 50)
-    pygame.draw.rect(screen, (0, 0, 0), button_1)
+    draw_text('Mode', 'Calibri', (255, 182, 193), (0, 0, 0), (20, 20))
+    pygame.display.flip()
 
 
 def set_up_tiles(l, w, s_l):
@@ -244,6 +245,7 @@ def window_generator():
 
 
 def set_up_tool_bar(l_e):
+    global tool_bar
     # tool_bar is 75 in height
     tool_bar = pygame.Surface([l_e, 75])
     tool_bar.fill([135, 206, 235])
@@ -426,17 +428,17 @@ def double_pressed(mouse_pos):
     tile = loc[1]
     numb = tile_pressed.number
     adjacent_tiles_loc = [(row + x, tile + y) for x in range(-1, 2) for y in range(-1, 2) if
-                        0 <= (row + x) <= rows_per_grid and 0 <= (tile + y) <= tiles_per_row]
+                          0 <= (row + x) <= rows_per_grid and 0 <= (tile + y) <= tiles_per_row]
     adjacent_tiles_loc.remove(loc)
     adjacent_tiles = [grid[loc[0]][loc[1]] for loc in adjacent_tiles_loc if not (grid[loc[0]][loc[1]].pressed)]
-    adjacent_not_flagged = [tile for tile in adjacent_tiles if not(tile.flagged)]
+    adjacent_not_flagged = [tile for tile in adjacent_tiles if not (tile.flagged)]
     number_flagged = len(adjacent_tiles) - len(adjacent_not_flagged)
     if 1 <= numb and number_flagged < numb:
         for tile in adjacent_not_flagged:
             tile.double_pressed()
         pygame.display.flip()
     elif 1 <= numb == number_flagged:
-        not_bombs = [tile for tile in adjacent_not_flagged if not(tile.bomb)]
+        not_bombs = [tile for tile in adjacent_not_flagged if not (tile.bomb)]
         for tile in not_bombs:
             change_tile_color((tile.x, tile.y), square_length)
         pygame.display.flip()
