@@ -163,6 +163,7 @@ def draw_text(text, style, text_color, background_color, loc):
     textRect = text.get_rect()
     textRect.topleft = loc
     screen.blit(text, textRect)
+    return textRect
 
 
 def get_mode(game_mode='normal'):
@@ -171,9 +172,30 @@ def get_mode(game_mode='normal'):
 
 
 def mode_menu():
+    global menu
     """A button that will lead to an options menu"""
-    draw_text('Mode', 'Calibri', (255, 182, 193), (0, 0, 0), (20, 20))
+    menu = draw_text('Mode', 'Calibri', (255, 182, 193), (0, 0, 0), (20, 20))
     pygame.display.flip()
+
+
+def check_menu(mouse):
+    for event in events:
+        if menu.collidepoint(mouse) and event.type == MOUSEBUTTONDOWN:
+            options()
+    pygame.display.flip()
+
+
+def options():
+    global running
+    running = False
+    options_surface = pygame.display.set_mode((300, 300))
+    options_surface.fill((255, 182, 193))
+    run_option = True
+    while run_option:
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
 
 
 def set_up_tiles(l, w, s_l):
@@ -459,6 +481,7 @@ def main_loop():
         events = pygame.event.get()
         for event in events:
             pos = pygame.mouse.get_pos()
+            check_menu(pos)
             if event.type == QUIT:
                 running = False
             elif event.type == MOUSEBUTTONDOWN and event.button == LEFT:
@@ -473,6 +496,7 @@ def main_loop():
         events = pygame.event.get()
         for event in events:
             pos = pygame.mouse.get_pos()
+            check_menu(pos)
             mouse = pygame.mouse.get_pressed()
             win()
             if event.type == QUIT:
