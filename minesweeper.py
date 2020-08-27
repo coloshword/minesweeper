@@ -2,6 +2,7 @@ from random import sample, randint
 import pygame
 import time
 import sys
+import pygame.gfxdraw
 
 pygame.font.get_fonts
 
@@ -156,6 +157,61 @@ class Tile(pygame.sprite.Sprite):
         screen.blit(self.tile, (self.x, self.y))
 
 
+def draw_rounded_rect(surface, rect, color, corner_radius):
+    if rect.width < 2 * corner_radius or rect.height < 2 * corner_radius:
+        raise ValueError(f"Both height (rect.height) and width (rect.width) must be > 2 * corner radius ({corner_radius})")
+
+    # need to use anti aliasing circle drawing routines to smooth the corners
+    pygame.gfxdraw.aacircle(surface, rect.left+corner_radius, rect.top+corner_radius, corner_radius, color)
+    pygame.gfxdraw.aacircle(surface, rect.right-corner_radius-1, rect.top+corner_radius, corner_radius, color)
+    pygame.gfxdraw.aacircle(surface, rect.left+corner_radius, rect.bottom-corner_radius-1, corner_radius, color)
+    pygame.gfxdraw.aacircle(surface, rect.right-corner_radius-1, rect.bottom-corner_radius-1, corner_radius, color)
+
+    pygame.gfxdraw.filled_circle(surface, rect.left+corner_radius, rect.top+corner_radius, corner_radius, color)
+    pygame.gfxdraw.filled_circle(surface, rect.right-corner_radius-1, rect.top+corner_radius, corner_radius, color)
+    pygame.gfxdraw.filled_circle(surface, rect.left+corner_radius, rect.bottom-corner_radius-1, corner_radius, color)
+    pygame.gfxdraw.filled_circle(surface, rect.right-corner_radius-1, rect.bottom-corner_radius-1, corner_radius, color)
+
+    rect_tmp = pygame.Rect(rect)
+
+    rect_tmp.width -= 2 * corner_radius
+    rect_tmp.center = rect.center
+    pygame.draw.rect(surface, color, rect_tmp)
+
+    rect_tmp.width = rect.width
+    rect_tmp.height -= 2 * corner_radius
+    rect_tmp.center = rect.center
+    pygame.draw.rect(surface, color, rect_tmp)
+
+
+def draw_bordered_rounded_rect(text, text_color, loc, surface, rect, color, border_color, corner_radius, border_thickness):
+    if corner_radius < 0:
+        raise ValueError(f"border radius ({corner_radius}) must be >= 0")
+
+    rect_tmp = pygame.Rect(rect)
+    center = rect_tmp.center
+
+    if border_thickness:
+        if corner_radius <= 0:
+            pygame.draw.rect(surface, border_color, rect_tmp)
+        else:
+            draw_rounded_rect(surface, rect_tmp, border_color, corner_radius)
+
+        rect_tmp.inflate_ip(-2*border_thickness, -2*border_thickness)
+        inner_radius = corner_radius - border_thickness + 1
+    else:
+        inner_radius = corner_radius
+
+    if inner_radius <= 0:
+        pygame.draw.rect(surface, color, rect_tmp)
+    else:
+        draw_rounded_rect(surface, rect_tmp, color, inner_radius)
+    #draw text
+    font = pygame.font.SysFont("Calibri", 30)
+    text = font.render(text, True, text_color)
+    surface.blit(text, loc)
+
+
 def draw_text(text, style, text_color, background_color, loc):
     #(text, font)
     font = pygame.font.SysFont(style, 50)
@@ -166,7 +222,7 @@ def draw_text(text, style, text_color, background_color, loc):
     return textRect
 
 
-def get_mode(game_mode='normal'):
+def get_mode(game_mode='easy'):
     global mode
     mode = game_mode
 
@@ -188,14 +244,23 @@ def check_menu(mouse):
 def options():
     global running
     running = False
-    options_surface = pygame.display.set_mode((300, 300))
-    options_surface.fill((255, 182, 193))
+    options_surface = pygame.display.set_mode((500, 500))
+    options_surface.fill((138, 43, 226))
+    font = pygame.font.SysFont('Calibri', 60)
+    text = font.render("GAME MODE", True, [255, 255, 255])
+    screen.blit(text, (120, 30))
+    pygame.draw.rect(screen, (160, 215, 79), (0, 75, 500, 425))
+    # Game buttons
+    easy = draw_bordered_rounded_rect("Easy", (255, 255, 255), (230, 128), screen, (180, 120, 150, 35), (0, 123, 255), (0, 0, 0), 3, 0)
+    normal = draw_bordered_rounded_rect("Normal", (255, 255, 255), (220, 228), screen, (180, 220, 150, 35), (0, 123, 255), (0, 0, 0), 3, 0)
+    hard = draw_bordered_rounded_rect("Hard", (255, 255, 255), (230, 328), screen, (180, 320, 150, 35), (0, 123, 255), (0, 0, 0), 3, 0)
     run_option = True
     while run_option:
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
+            pygame.display.flip()
 
 
 def set_up_tiles(l, w, s_l):
