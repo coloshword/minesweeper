@@ -210,6 +210,7 @@ def draw_bordered_rounded_rect(text, text_color, loc, surface, rect, color, bord
     font = pygame.font.SysFont("Calibri", 30)
     text = font.render(text, True, text_color)
     surface.blit(text, loc)
+    return Rect(rect)
 
 
 def draw_text(text, style, text_color, background_color, loc):
@@ -230,7 +231,7 @@ def get_mode(game_mode='easy'):
 def mode_menu():
     global menu
     """A button that will lead to an options menu"""
-    menu = draw_text('Mode', 'Calibri', (255, 182, 193), (0, 0, 0), (20, 20))
+    menu = draw_bordered_rounded_rect("Menu", (255, 255, 255), (35, 25), screen, (15, 15, 100, 40), (177, 156, 217), (0, 0 , 0), 3, 0)
     pygame.display.flip()
 
 
