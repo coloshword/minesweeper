@@ -223,11 +223,6 @@ def draw_text(text, style, text_color, background_color, loc):
     return textRect
 
 
-def get_mode(game_mode='easy'):
-    global mode
-    mode = game_mode
-
-
 def mode_menu():
     global menu
     """A button that will lead to an options menu"""
@@ -258,10 +253,21 @@ def options():
     run_option = True
     while run_option:
         for event in pygame.event.get():
+            pos = pygame.mouse.get_pos()
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
-            pygame.display.flip()
+            elif easy.collidepoint(pos) and event.type == MOUSEBUTTONDOWN:
+                main_loop('easy')
+                run_option = False
+            elif normal.collidepoint(pos) and event.type == MOUSEBUTTONDOWN:
+                main_loop()
+                run_option = False
+            elif hard.collidepoint(pos) and event.type == MOUSEBUTTONDOWN:
+                main_loop('hard')
+                run_option = False
+        pygame.display.flip()
+    pygame.display.flip()
 
 
 def set_up_tiles(l, w, s_l):
@@ -535,11 +541,12 @@ def double_pressed(mouse_pos):
         pygame.display.flip()
 
 
-def main_loop():
+def main_loop(game_mode='normal'):
     global running
     global events
     global mouse
-    get_mode()
+    global mode
+    mode = game_mode
     window_generator()
     mode_menu()
     set_up_tiles(length, width, square_length)
