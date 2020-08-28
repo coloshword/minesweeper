@@ -239,7 +239,8 @@ def check_menu(mouse):
 
 def options():
     global running
-    running = False
+    global master_run
+    master_run = False
     options_surface = pygame.display.set_mode((500, 500))
     options_surface.fill((138, 43, 226))
     font = pygame.font.SysFont('Calibri', 60)
@@ -546,11 +547,14 @@ def main_loop(game_mode='normal'):
     global events
     global mouse
     global mode
+    global master_run
+    running = True
+    master_run = True
     mode = game_mode
     window_generator()
     mode_menu()
     set_up_tiles(length, width, square_length)
-    while running:
+    while running and master_run:
         events = pygame.event.get()
         for event in events:
             pos = pygame.mouse.get_pos()
@@ -565,7 +569,7 @@ def main_loop(game_mode='normal'):
                 running = False
             pygame.display.flip()
     running = True
-    while running:
+    while running and master_run:
         events = pygame.event.get()
         for event in events:
             pos = pygame.mouse.get_pos()
@@ -598,7 +602,7 @@ def main_loop(game_mode='normal'):
                         tile.revert()
                     pygame.display.flip()
     running = True
-    while running:
+    while running and master_run:
         events = pygame.event.get()
         for event in events:
             if event.type == QUIT:
