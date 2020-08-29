@@ -183,7 +183,7 @@ def draw_rounded_rect(surface, rect, color, corner_radius):
     pygame.draw.rect(surface, color, rect_tmp)
 
 
-def draw_bordered_rounded_rect(surface, rect, color, border_color, corner_radius, border_thickness, text=None, text_color=None, loc=None):
+def draw_bordered_rounded_rect(surface, rect, color, border_color, corner_radius, border_thickness, text=None, text_color=None, loc=None, text_size=30):
     if corner_radius < 0:
         raise ValueError(f"border radius ({corner_radius}) must be >= 0")
 
@@ -206,14 +206,17 @@ def draw_bordered_rounded_rect(surface, rect, color, border_color, corner_radius
         draw_rounded_rect(surface, rect_tmp, color, inner_radius)
     #draw text
     if text !=None:
-        font = pygame.font.SysFont("Calibri", 30)
+        font = pygame.font.SysFont("Calibri", text_size)
         text = font.render(text, True, text_color)
         surface.blit(text, loc)
     return Rect(rect)
 
 
 def show_timer():
-    draw_bordered_rounded_rect(screen, (400, 15, 100, 40), (255, 255, 255), (255, 0, 0), 3, 5)
+    draw_bordered_rounded_rect(screen, (400, 15, 100, 40), (255, 255, 255), (255, 0, 0), 3, 5, str(time_left), (255, 0, 0), (425, 23), 40)
+#
+#
+# def timer():
 
 
 def mode_menu():
@@ -302,7 +305,9 @@ def window_generator():
     global flags
     global tiles_left
     global win_display_time
+    global time_left
     if mode == 'easy':
+        time_left = 100
         bombs_spawned = 10
         square_length = 50
         tiles_left = (10 * 8) - bombs_spawned
@@ -311,6 +316,7 @@ def window_generator():
         win_display_time = 0.1
         adjust_display(length, width)
     elif mode == 'normal':
+        time_left = 300
         bombs_spawned = 40
         square_length = 40
         tiles_left = (18 * 14) - bombs_spawned
@@ -320,6 +326,7 @@ def window_generator():
         adjust_display(length, width)
         win_display_time = 0.05
     else:
+        time_left = 500
         bombs_spawned = 99
         # 24 x 20
         tiles_left = (24 * 20) - bombs_spawned
