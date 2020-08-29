@@ -8,7 +8,6 @@ pygame.font.get_fonts
 
 from pygame.locals import (
     Rect,
-    MOUSEBUTTONUP,
     MOUSEBUTTONDOWN,
     QUIT
 )
@@ -184,12 +183,11 @@ def draw_rounded_rect(surface, rect, color, corner_radius):
     pygame.draw.rect(surface, color, rect_tmp)
 
 
-def draw_bordered_rounded_rect(text, text_color, loc, surface, rect, color, border_color, corner_radius, border_thickness):
+def draw_bordered_rounded_rect(surface, rect, color, border_color, corner_radius, border_thickness, text=None, text_color=None, loc=None):
     if corner_radius < 0:
         raise ValueError(f"border radius ({corner_radius}) must be >= 0")
 
     rect_tmp = pygame.Rect(rect)
-    center = rect_tmp.center
 
     if border_thickness:
         if corner_radius <= 0:
@@ -207,26 +205,21 @@ def draw_bordered_rounded_rect(text, text_color, loc, surface, rect, color, bord
     else:
         draw_rounded_rect(surface, rect_tmp, color, inner_radius)
     #draw text
-    font = pygame.font.SysFont("Calibri", 30)
-    text = font.render(text, True, text_color)
-    surface.blit(text, loc)
+    if text !=None:
+        font = pygame.font.SysFont("Calibri", 30)
+        text = font.render(text, True, text_color)
+        surface.blit(text, loc)
     return Rect(rect)
 
 
-def draw_text(text, style, text_color, background_color, loc):
-    #(text, font)
-    font = pygame.font.SysFont(style, 50)
-    text = font.render(text, True, text_color, background_color)
-    textRect = text.get_rect()
-    textRect.topleft = loc
-    screen.blit(text, textRect)
-    return textRect
+def show_timer():
+    draw_bordered_rounded_rect(screen, (400, 15, 100, 40), (255, 255, 255), (255, 0, 0), 3, 5)
 
 
 def mode_menu():
     global menu
     """A button that will lead to an options menu"""
-    menu = draw_bordered_rounded_rect("Menu", (255, 255, 255), (35, 25), screen, (15, 15, 100, 40), (177, 156, 217), (0, 0 , 0), 3, 0)
+    menu = draw_bordered_rounded_rect(screen, (15, 15, 100, 40), (177, 156, 217), (0, 0 , 0), 3, 0, "Menu", (255, 255, 255), (35, 25))
     pygame.display.flip()
 
 
@@ -248,9 +241,9 @@ def options():
     screen.blit(text, (120, 30))
     pygame.draw.rect(screen, (160, 215, 79), (0, 75, 500, 425))
     # Game buttons
-    easy = draw_bordered_rounded_rect("Easy", (255, 255, 255), (230, 128), screen, (180, 120, 150, 35), (0, 123, 255), (0, 0, 0), 3, 0)
-    normal = draw_bordered_rounded_rect("Normal", (255, 255, 255), (220, 228), screen, (180, 220, 150, 35), (0, 123, 255), (0, 0, 0), 3, 0)
-    hard = draw_bordered_rounded_rect("Hard", (255, 255, 255), (230, 328), screen, (180, 320, 150, 35), (0, 123, 255), (0, 0, 0), 3, 0)
+    easy = draw_bordered_rounded_rect(screen, (180, 120, 150, 35), (0, 123, 255), (0, 0, 0), 3, 0, "Easy", (255, 255, 255), (230, 128))
+    normal = draw_bordered_rounded_rect(screen, (180, 220, 150, 35), (0, 123, 255), (0, 0, 0), 3, 0, "Normal", (255, 255, 255), (220, 228))
+    hard = draw_bordered_rounded_rect(screen, (180, 320, 150, 35), (0, 123, 255), (0, 0, 0), 3, 0, "Hard", (255, 255, 255), (230, 328))
     run_option = True
     while run_option:
         for event in pygame.event.get():
@@ -554,6 +547,7 @@ def main_loop(game_mode='normal'):
     window_generator()
     mode_menu()
     set_up_tiles(length, width, square_length)
+    show_timer()
     while running and master_run:
         events = pygame.event.get()
         for event in events:
